@@ -1,6 +1,6 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <img alt="Mousai logo" src="./assets/logo.png" style="height:300px; margin: 50px;">
+  <HelloWorld msg="Welcome to Mousai Neurotechnologies"/>
 </template>
 
 <script>
@@ -15,12 +15,15 @@ export default {
 </script>
 
 <style>
+  html,body{
+    background: #121212;
+  }
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: Montserrat, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: white;
   margin-top: 60px;
 }
 </style>
