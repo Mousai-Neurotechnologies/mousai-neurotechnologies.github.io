@@ -3,8 +3,14 @@
     <h1>{{ msg }}</h1>
     <p>
       To see our demo of Brainstorm,<br>
-      check out the
-      <a href="https://app.mousaineuro.com" target="_blank" rel="noopener">this page.</a>.
+      check out
+      <a href="https://app.mousaineuro.com/" target="_blank" rel="noopener">this page</a>.
+    </p>
+
+    <p>
+      To see Invocations: our interactive blog,<br>
+      check out
+      <a href="blog.mousaineuro.com/" target="_blank" rel="noopener">this page</a>.
     </p>
   </div>
 </template>
