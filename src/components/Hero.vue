@@ -5,7 +5,7 @@
     <h3>{{ subtitle }}</h3>
     <p>{{ description }}</p>
     <div id="buttons">
-      <a v-bind:href= 'button1_href' rel="noopener">{{button1_text}}</a>
+      <router-link v-bind:to='button1_href' rel="noopener">{{button1_text}}</router-link>
       <a v-bind:href= 'button2_href' target="_blank" rel="noopener"> {{button2_text}} </a>
     </div>
     </section>
@@ -49,6 +49,15 @@ export default {
   text-align: center;
 }
 
+@media (max-width: 630px) {
+  #buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
 #buttons {
   margin: 50px 0px;
 }
@@ -58,7 +67,7 @@ h1, h3{
 }
 
 a {
-  margin-right: 20px;
+  margin: 00px 20px 20px 0px;
   padding: 10px 20px;
   /* background: #FF76E9; */
   color: whitesmoke;
@@ -66,7 +75,6 @@ a {
   border: 1px solid whitesmoke;
   border-radius: 5px;
   transition: 0.5s;
-
 }
 
 a:hover{

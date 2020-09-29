@@ -134,4 +134,10 @@ a.link.router-link-exact-active {
   color: #FF76E9;
 }
 
+@media (max-width: 630px) {
+  #nav a.link{
+    display: none;
+  }
+}
+
 </style>
