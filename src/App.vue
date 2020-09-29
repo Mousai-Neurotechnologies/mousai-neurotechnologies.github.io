@@ -1,14 +1,28 @@
+
 <template>
   <div id="nav">
-    <img alt="Vue logo" src="./assets/logo_long.png">
+    <router-link to="/" class="img"><img alt="Vue logo" src="./assets/logo_long.png"></router-link>
     <div id="links">
-      <router-link to="/">Home</router-link>
-      <router-link to="/about">About Us</router-link>
-      <router-link to="/contact">Contact</router-link>
+      <router-link to="/" class="link">Home</router-link>
+      <router-link to="/about" class="link">About Us</router-link>
+      <router-link to="/contact" class="link">Contact</router-link>
     </div>
   </div>
   <router-view/>
+  <Footer/>
 </template>
+
+<script>
+  // @ is an alias to /src
+  import Footer from '@/components/Footer.vue'
+
+  export default {
+    name: 'Home',
+    components: {
+      Footer
+    }
+  }
+</script>
 
 <style>
   html, body{
@@ -37,10 +51,10 @@
 
   section{
     color: white;
-    margin: 0px 75px;
+    margin: 75px;
   }
 
-#app {
+  #app {
   font-family: Montserrat, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -58,19 +72,57 @@ img {
   height: 75px;
   background: #111111;
   padding: 0px 50px;
+  position: sticky;
+  top: 0;
+  left: 0;
+
 }
 
-a {
+a.text {
   color: #FF76E9;
   text-decoration: none;
 }
 
-#nav a {
-  color: white;
-  padding-left: 20px;
+a.text:visited {
+  color: #999999;
 }
 
-#nav a.router-link-exact-active {
+#nav a.link {
+  margin-left: 20px;
+}
+
+a.link {
+  color: white;
+  text-decoration: none;
+  position: relative;
+  cursor: pointer;
+  padding: 5px 0px;
+  transition: .5s;
+  }
+
+a.link:hover {
+   color: #FF76E9;
+}
+
+a.link:before {
+   content: "";
+   position: absolute;
+   width: 0;
+   height: 1px;
+   bottom: 0;
+   left: 0;
+   background-color: white;
+  visibility: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+a.link:hover:before {
+   visibility: visible;
+   width: 100%;
+ }
+
+a.link.router-link-exact-active {
   color: #FF76E9;
 }
+
 </style>
