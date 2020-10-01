@@ -6,7 +6,7 @@
     <p>{{ description }}</p>
     <div id="buttons">
       <router-link v-bind:to='button1_href' rel="noopener">{{button1_text}}</router-link>
-      <a v-bind:href= 'button2_href' target="_blank" rel="noopener"> {{button2_text}} </a>
+      <router-link v-bind:to= 'button2_href' rel="noopener"> {{button2_text}} </router-link>
     </div>
     </section>
   </div>

@@ -1,15 +1,18 @@
 <template>
   <section class="about">
     <h1>About Us</h1>
-    <h3>Human-Centered Design in Commercial Neurotechnology</h3>
-    <p>Mousai Neurotechnologies is a digital agency that enables non-expert
-      stakeholders to participate in brain technology design.</p>
+    <h3>Human-Centered Neurotechnology Design</h3>
+    <p>Since 2020, Mousai Neurotechnologies has enabled some of the world's top neurotechnology
+      companies to empower non-expert stakeholders to participate in technology design.</p>
     <p><strong>Services: </strong>Transformative,
       interactive experiences and a community engaged
       with participatory (design of) media. We don't sell
       your agency to other companies; we help you to take back
       agency over your own brain.</p>
     <ul>
+      <li>Product R&D: We research, design, and build digital tools that make people's lives easier</li>
+      <li>Digital Design & Development: We create transformative digital experiences, optimized for later product development</li>
+      <li>Content & Production: We make compelling content from our in-house studio</li>
       <li>Strategy: Consulting, planning, and research</li>
       <li>Design: UX, photography, and visual arts</li>
       <li>Technology: Engineering, data, and systems design</li>
@@ -28,6 +31,6 @@
 
     <h1>Our Mythology</h1>
     <p>Neurotechnology is inevitable, empowering, and a siren song that many cannot ignore.
-      We must reclaim agency over our brains—because, sadly, we don't have agency over them any longer.</p>
+      We must reclaim agency over our brains—because, sadly, we don't have agency over our own.</p>
   </section>
 </template>

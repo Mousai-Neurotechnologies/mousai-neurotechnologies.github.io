@@ -1,50 +1,46 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
-import About from '../views/About.vue'
-import Projects from '../views/Projects.vue'
-import Contact from '../views/Contact.vue'
-import NotFound from '../views/NotFound.vue'
+import Site from '../views/Site.vue'
 
 
 const routes = [
   {
+    path: '/brainstorm',
+    name: 'Brainstorm',
+    component: () => import(/* webpackChunkName: "brainstorm" */ '../views/Brainstorm.vue')
+  },
+  {
     path: '/',
-    name: 'Home',
-    component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: About
-  },
-  {
-    path: '/projects',
-    name: 'Projects',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: Projects
-  },
-  {
-    path: '/contact',
-    name: 'Contact',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: Contact
-  },
+    name: 'Site',
+    component: Site,
+    children: [
+      {
+        path: '/',
+        name: 'Home',
+        component: Home,},
+      {
+        path: '/about',
+        name: 'About',
+        component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+      },
+      {
+        path: '/projects',
+        name: 'Projects',
+        component: () => import(/* webpackChunkName: "projects" */ '../views/Projects.vue')
+      },
+      {
+        path: '/contact',
+        name: 'Contact',
+        component: () => import(/* webpackChunkName: "contact" */ '../views/Contact.vue')
+      },
 
-  {
-    path: '/:catchAll(.*)',
-    name: 'NotFound',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: NotFound
-  }
+      {
+        path: '/:catchAll(.*)',
+        name: 'NotFound',
+        component: () => import(/* webpackChunkName: "not found" */ '../views/NotFound.vue')
+      },
+    ]
+  },
 ]
 
 const router = createRouter({
