@@ -28,6 +28,9 @@
     font-weight: 400;
   }
 
+  button {width: 100%; height: 50px; cursor: pointer; color: white;
+    background: #7373FF; border: none; padding: 10px; font-weight: bold;}
+
   section{
     color: white;
     margin: 75px;
@@ -39,6 +42,9 @@
   -moz-osx-font-smoothing: grayscale;
   color: white;
 }
+
+  #messages li { flex-grow: 1; padding: 5px 10px; color: whitesmoke;}
+  #messages li:nth-child(odd) { background: rgb(15,15,15)}
 
 img {
   height: 40px;

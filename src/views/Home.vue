@@ -6,7 +6,7 @@
     title="Inspire Neurotechnology Design"
     subtitle="We empower user feedback through interactive media"
     button1_text="Learn More" button1_href="/about"
-    button2_text="See our Blog" button2_href="/projects"
+    button2_text="Contribute" button2_href="/contribute"
     align="left"/>
   </div>
   <div>

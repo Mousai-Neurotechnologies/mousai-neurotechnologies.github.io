@@ -4,8 +4,12 @@
         <h3>Livewire: A Stimulating Night of Neurotechnology</h3>
         <p>Livewire is an immersive entertainment event in March 5th, 2021.</p>
 
+        <h3>#BCIGameJam</h3>
+        <p>#BCIGameJam is a speculative design workshop hosted by Dimitris Grammenos
+            at the University of Southern California.</p>
+
         <h3>Invocations</h3>
-        <p>Invocations is Mousai's weekly newsletter.</p>
+        <p>Invocations is Mousai's monthly newsletter.</p>
 
         <h3>Brainstorm</h3>
         <p>Brainstorm is a social neurotechnology platform that

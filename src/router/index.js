@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Site from '../views/Site.vue'
 
@@ -33,6 +33,11 @@ const routes = [
         name: 'Contact',
         component: () => import(/* webpackChunkName: "contact" */ '../views/Contact.vue')
       },
+      {
+        path: '/contribute',
+        name: 'Contribute',
+        component: () => import(/* webpackChunkName: "contribute" */ '../views/Contribute.vue')
+      },
 
       {
         path: '/:catchAll(.*)',
@@ -43,8 +48,13 @@ const routes = [
   },
 ]
 
+// const router = createRouter({
+//   history: createWebHistory(process.env.BASE_URL),
+//   routes
+// })
+
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(),
   routes
 })
 
