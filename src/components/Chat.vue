@@ -1,10 +1,10 @@
 <template>
-    <div id="tutorial">
-        <div id="tutorial-text">
-        <h1>Welcome to Brainstorm!</h1>
-        <button id="close-tutorial" v-on:click="closeTutorial">Close Tutorial</button>
-        </div>
-    </div>
+<!--    <div id="tutorial">-->
+<!--        <div id="tutorial-text">-->
+<!--        <h1>Welcome to Brainstorm!</h1>-->
+<!--        <button id="close-tutorial" v-on:click="closeTutorial">Close Tutorial</button>-->
+<!--        </div>-->
+<!--    </div>-->
     <div>
         <div id="p5Canvas"></div>
     </div>
@@ -12,8 +12,13 @@
         <button id="open-tutorial" v-on:click="openTutorial">Open Tutorial</button>
         <button v-on:click="generateSignal">Generate Signal</button>
         <div>
-        <p>Frequency: {{ rangeSlider }}</p>
-        <input v-model="rangeSlider" type="range" min="1" max="100" class="slider" id="myRange">
+            <p>Frequency: {{ rangeSlider }}</p>
+            <input v-model="rangeSlider" type="range" min="1" max="100" class="slider" id="myRange">
+        </div>
+        <div>
+            <p>Filter: {{ minFilter }} - {{ maxFilter }}</p>
+            <input v-model="minFilter" type="range" min="1" max="100" class="slider" id="min">
+            <input v-model="maxFilter" type="range" min="1" max="100" class="slider" id="max">
         </div>
     </div>
     <div id="chat">
@@ -37,6 +42,8 @@
     import $ from 'jquery'
     import bci from 'bcijs'
     import p5 from 'p5'
+    import fili from 'fili';
+
 
     let yvalues = new Array(200).fill(0);
     let other_yvalues = new Array(yvalues.length).fill(0);
@@ -45,7 +52,9 @@
 
     let signal = [];
 
-    let samplerate = 125;
+    let samplerate = 125; // This is almost definitely wrong
+
+    let filterOrder = 128;
 
     export default {
         data() {
@@ -54,7 +63,9 @@
                 message: '',
                 messages: [],
                 socket: io.connect(('https://mousai.azurewebsites.net/')),
-                rangeSlider: 10
+                rangeSlider: 10,
+                minFilter: 1.0, //7,
+                maxFilter: 100.0 //30
             }
         },
         methods: {
@@ -71,16 +82,43 @@
             generateSignal() {
                 // Generate 1 second of sample data at 512 Hz
                 // Contains 8 μV / 8 Hz and 4 μV / 17 Hz
+                signal = [];
                 let len = 1
-                signal = bci.generateSignal([59], [this.rangeSlider], samplerate, len);
+                let channels = [0,1]
+                for (let channel in channels) {
+                    if (channel==0){
+                        signal = [bci.generateSignal([59], [this.rangeSlider], samplerate, len)];
+                    } else {
+                        signal.push(bci.generateSignal([59], [this.rangeSlider], samplerate, len));
+                    }
+                }
+                signal = this.filterSignal(signal)
 
                 let data = {
-                    signal: signal,
+                    signal: signal[0],
                     time: basetime
                 }
 
                 this.socket.emit('bci', data)
                 console.log('Signal generated')
+            },
+            filterSignal(data){
+                let firCalculator = new fili.FirCoeffs();
+                let coeffs = firCalculator.bandpass({order: filterOrder, Fs: samplerate, F1: this.minFilter, F2: this.maxFilter});
+                let filter = new fili.FirFilter(coeffs);
+                let features = bci.windowApply(data, trial => {
+                    // Bandpass filter the trial
+                    let channels = bci.transpose(trial);
+                    console.log(channels)
+                    channels = channels.map(sig => filter.simulate(sig).slice(filterOrder));
+                    console.log(channels)
+                    trial = bci.transpose(channels);
+                    console.log(trial)
+                    return trial
+                }, data.length, data.length);
+                console.log([].concat(...features))
+                console.log('filtering')
+                return data
             },
             closeTutorial(){
                 document.getElementById("tutorial").style.display = 'none';
@@ -110,7 +148,6 @@
                 console.log('Signal passed')
             }
 
-
             new p5(function (p5) {
                 // let start_time = Date.now();
                 let first_sig = true;
@@ -136,7 +173,11 @@
                 p5.draw = () => {
                     p5.background(0);
                     p5.translate(0, p5.height/2);
-                    signal_package = [signal,passed_signal];
+                    if (signal.length > 0) {
+                        signal_package = [signal[0], passed_signal];
+                    } else{
+                        signal_package = [signal, passed_signal];
+                    }
                     time_package = [passed_time,passed_time];
                     y_package = [yvalues,other_yvalues];
                     basetime_package = [basetime, other_basetime]
@@ -163,20 +204,26 @@
 
                 function renderWave(yvals,bt,usr,c) {
                     // A simple way to draw the wave with an ellipse at each location
-                    for (let ind = 0; ind < yvals.length-1; ind++) {
-                        // c.setAlpha(100)
-                        p5.stroke(c);
-                        p5.strokeWeight(2);
-                        in_min = Math.min(...bt);
-                        in_max = Math.max(...bt);
-                        out_min = 0;
-                        out_max = p5.width;
-                        t_inner = bt.map(x => (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
+                    // c.setAlpha(100)
 
-                        y1 = yvals[ind]
+                    // Filter
+                    let y_filtered = yvals //filterSignal(yvals)
+
+
+                    // Map to Window Size
+                    p5.stroke(c);
+                    p5.strokeWeight(2);
+                    in_min = Math.min(...bt);
+                    in_max = Math.max(...bt);
+                    out_min = 0;
+                    out_max = p5.width;
+                    t_inner = bt.map(x => (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
+
+                    for (let ind = 0; ind < y_filtered.length-1; ind++) {
+                        y1 = y_filtered[ind]
                         p5.push()
                         p5.scale(1, -1);
-                        p5.line(t_inner[ind], y1, t_inner[ind+1], yvals[ind+1]);
+                        p5.line(t_inner[ind], y1, t_inner[ind+1], y_filtered[ind+1]);
                         p5.pop()
                     }
                     // let diffs = 0;
@@ -186,7 +233,7 @@
                     // let diff = diffs/(bt.length-1)
                     if (usr == 'me'){
                         let band_names = ['alpha', 'beta', 'theta', 'gamma']
-                        let bandpowers = bci.bandpower(yvals, samplerate, band_names,{relative:true});
+                        let bandpowers = bci.bandpower(y_filtered, samplerate, band_names,{relative:true});
                         let val;
                         p5.noStroke()
                         p5.fill('white')
@@ -303,7 +350,7 @@
         display: flex; flex-wrap: wrap; justify-content:center;
         align-items: flex-end;}
     form { flex-grow: 1; height: 15%; display: flex; align-items: center; padding: 20px; background: rgb(50,50,50);}
-    form input { flex-grow:4; border-radius: 10px;height: 50px; border: 0; padding: 10px; background: rgb(10,10,10); color:white;}
+    form input { flex-grow:4; height: 50px; border: 0; padding: 10px; background: rgb(10,10,10); color:white;}
     form button {flex-grow: 1; width: auto;}
     #messages {width: 100%; height: 85%; list-style-type: none; text-align: left}
 </style>
