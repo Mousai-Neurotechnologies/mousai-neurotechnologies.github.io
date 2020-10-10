@@ -4,7 +4,7 @@
     <meta charset=utf-8>
     <meta http-equiv=X-UA-Compatible content="IE=edge">
     <meta name=viewport content="width=device-width,initial-scale=1">
-    <link rel=icon href=/assets/favicon.ico>
+    <link rel=icon href=assets/favicon.ico>
     <link rel="stylesheet" type="text/css" href="css/style.css"/>
 <!--    <script src="https://d3js.org/d3.v6.min.js"></script>-->
     <script type="text/javascript" src="js/brainstorm.js"></script>
@@ -19,7 +19,10 @@
 <noscript>
     <strong>We're sorry but Mousai Neurotechnologies doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
 </noscript>
-<div id=app>
+
+<div id="loader"></div>
+
+<div id=app style="display:none;">
 <div id="brainstorm">
 <div>
     <div id="p5Canvas"></div>
@@ -216,6 +219,21 @@
         })
     }
 </script>
+
+
+<script>
+    var myVar;
+
+    function myFunction() {
+        myVar = setTimeout(showPage, 3000);
+    }
+
+    function showPage() {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("app").style.display = "block";
+    }
+</script>
+
 
 </body>
 </html>
