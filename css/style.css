@@ -501,7 +501,10 @@ a.link.router-link-exact-active {
     position: fixed; top: 0;
     left: 0; height: 100%; z-index:2;
     display: flex; flex-wrap: wrap; justify-content:center;
-    align-items: center; opacity:90%;}
+    align-items: center; opacity: .9;
+    transition: 2s;
+
+}
 
 #tutorial-text{
     background: rgb(0,0,0);
@@ -516,6 +519,14 @@ a.link.router-link-exact-active {
 #close-tutorial{
     width: 250px; border-radius: 0px; height: 50px; cursor: pointer; color: white; background: #50B5FF
 ; border: none; padding: 10px;
+}
+
+.tut-div{
+    width: 500px;
+}
+
+.tut-div p{
+    margin-right: 20px
 }
 
 #parameters{

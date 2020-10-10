@@ -48,10 +48,16 @@ function generateSignal() {
 //     return data
 // }
 
-function closeTutorial(){
-    document.getElementById("tutorial").style.display = 'none';
+function closeTutorial() {
+    setTimeout(() => {
+        document.getElementById("tutorial").style.opacity = '0';
+        document.getElementById("tutorial").style.pointerEvents = 'none';
+    }, this.animationDelay + 10);
 }
 
 function openTutorial(){
-    document.getElementById("tutorial").style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById("tutorial").style.opacity = '.9';
+        document.getElementById("tutorial").style.pointerEvents = 'auto';
+    }, this.animationDelay + 10);
 }
