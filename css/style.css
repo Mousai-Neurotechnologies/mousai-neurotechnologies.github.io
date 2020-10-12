@@ -6,6 +6,15 @@ body{
     font-family: Montserrat, sans-serif;
 }
 
+body::-webkit-scrollbar {
+    display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+body {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
 div {
     display: block;
 }
@@ -198,8 +207,10 @@ a.link.router-link-exact-active {
     }
 }
 
+
 .buttons {
     margin: 50px 0px;
+    display: flex;
 }
 
 /* Page Header */
@@ -218,6 +229,10 @@ a.link.router-link-exact-active {
 
 #projects-header{
     background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../assets/images/projects.jpg')
+}
+
+#livewire-header{
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../assets/images/livewire.png')
 }
 
 #contact-header{
@@ -249,7 +264,7 @@ a.link.router-link-exact-active {
 
 #newsletter-form h3{
     flex-grow: 1;
-    margin: 20px 0px 0px 0px;
+    margin: 20px 0px 20px 0px;
 }
 
 .input-div{
@@ -266,7 +281,7 @@ a.link.router-link-exact-active {
     justify-content: space-between;
     align-items: center;
     border-radius: 5px;
-    flex-grow: 1;
+    flex-grow: 8;
     background: #111111;
     color: gray;
     font-size: 10px;
@@ -285,20 +300,22 @@ a.link.router-link-exact-active {
 }
 
 .form-submit{
-    color: white;
-    font-family: Roboto, sans-serif;
-    font-size: 10px;
-    background: #7373FF;
-    flex-grow: 1;
-    width: 100px;
-    border: 1px solid #7373FF;
-    border-radius: 5px;
+    font-family : inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    border: 1px solid whitesmoke;
     cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 5px;
     transition: 0.5s;
+    margin: 10px 0px;
 }
 
 .form-submit:hover {
-    background: #5E50FF;
+    border-color: #FF76E9;
+    color: #FF76E9;
 }
 
 .break{
@@ -502,7 +519,7 @@ a.link.router-link-exact-active {
 
 /* App Nav */
 
-#app-nav {
+#app-menu {
     height: 100%;
     width: 200px;
     display: flex;
@@ -523,32 +540,32 @@ a.link.router-link-exact-active {
     -webkit-transition: left 0.5s ease-in-out;
 }
 
-#app-nav img{
+#app-menu img{
     padding: 20px 0px 10px 0px;
     cursor: pointer;
 }
 
-#toggle{
-    position: absolute;
-    /*display: flex;*/
-    /*justify-content: center;*/
-    /*align-items: center;*/
+#menu-toggle{
     left: 200px;
-    background: transparent;
 }
 
-#toggle .icon:hover{
-    background: transparent;
-}
-
-#app-nav:hover{
+#app-menu:hover{
     left: 0px;
+}
+
+.toggle {
+    position: absolute;
+    background: transparent;
+    height: 100%;
+}
+
+.toggle .icon:hover{
+    background: transparent;
 }
 
 .icon{
     width: 100%;
-    margin-top: 10px;
-    padding: 10px 20px;
+    padding: 20px 0px;
     text-align: center;
     display: flex;
     justify-content: center;
@@ -616,7 +633,7 @@ button i {
 }
 
 #parameters{
-    position: fixed; width: calc(100% - 350px); background: transparent;
+    position: fixed; width: 100%; background: transparent;
     top: 0px; left: 0px; padding: 0px;
 }
 
@@ -667,16 +684,37 @@ button i {
     cursor: pointer;
 }
 
-#chat {width: 350px; background: rgb(5,5,5);
-    position: fixed; top: 0;
-    right: 0; z-index:1;
+
+/* Chat */
+
+#chat {width: 300px; background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+    position: fixed; top: 0; right: -300px;
     display: flex; flex-wrap: wrap; justify-content:center;
-    align-items: flex-start;
+    align-items: flex-start; z-index:2;
+
+    transition: right 0.5s ease-in-out;
+    -o-transition: right 0.5s ease-in-out;
+    -ms-transition: right 0.5s ease-in-out;
+    -moz-transition: right 0.5s ease-in-out;
+    -webkit-transition: right 0.5s ease-in-out;
+}
+
+#chat:hover{
+    right: 0;
+}
+
+#chat-toggle{
+    right: 300px;
+}
+
+.toggle .icon{
+    height: 100px;
+    width: 100px;
 }
 
 form { flex-grow: 1; height: 15vh; padding: 0px 20px; display: flex; align-items: center; justify-content:center; background: rgb(50,50,50);}
 form input {
-    flex-grow:4; height: 50px; border: 0; padding: 0px 20px; background: rgb(10,10,10); color:white;
+    flex-grow:4; height: 50px; border-radius: 5px; border: 0; padding: 0px 20px; background: rgb(10,10,10); color:white;
 }
 form input:focus{
     outline: none;
@@ -694,5 +732,5 @@ form button {flex-grow: 1; width: auto;}
     scrollbar-width: none;  /* Firefox */
 }
 #messages li { flex-grow: 1; padding: 5px 10px; color: whitesmoke;}
-#messages li:nth-child(odd) { background: rgb(15,15,15)}
+#messages li:nth-child(odd) { background: linear-gradient(rgba(50, 50, 50, 0.6), rgba(50, 50, 50, 0.6))}
 

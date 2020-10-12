@@ -25,13 +25,31 @@
 <div id=app>
 
     <!--Navbar-->
-    <div id="app-nav">
-        <div id="toggle"><div class="icon"><i class="fas fa-angle-right fa-3x"></i></div></div>
-        <a href="./index.html" class="img"><img alt="Mousai Neurotechnologies" src="assets/logo_long.png"></a>
+    <div id="app-menu">
+        <div id="menu-toggle" class="toggle"><div class="icon"><i class="fas fa-angle-right fa-3x"></i></div></div>
+        <div class="icon"><a href="./index.html" class="img"><img alt="Mousai Neurotechnologies" src="assets/logo_long.png"></a></div>
         </a>
         <div class="icon" onclick="openTutorial()">
-        <a><i class="fas fa-book-open fa-3x"></i></a><p>Tutorial</p>
+        <a><i class="fas fa-book-open fa-2x"></i></a><p>Tutorial</p>
         </div>
+    </div>
+
+    <!-- Chat Bar-->
+    <div id="chat">
+        <div id="chat-toggle" class="toggle"><div class="icon"><i class="fas fa-paper-plane fa-2x"></i></div></div>
+        <ul id="messages"></ul>
+        <form action="" onsubmit="sendMessage()">
+            <!--            <div class="gorm-group">-->
+            <!--                <label for="user">User:</label>-->
+            <!--                <input type="text" v-model="user" class="form-control">-->
+            <!--            </div>-->
+            <label for="message"></label>
+            <input type="text" id="message" autocomplete="off" placeholder="Type message here..."/>
+            <!--        <button id="chat-button" onclick="generateSignal()">-->
+            <!--            <i class="fas fa-paper-plane fa-2x"></i>-->
+            <!--            Send-->
+            <!--        </button>-->
+        </form>
     </div>
 
 <div id="brainstorm">
@@ -57,7 +75,7 @@
     <div>
     <button class="purple-button" onclick="generateSignal()">
         <i class="fas fa-wave-square fa-2x"></i>
-        Generate Signal
+        Send Signal
     </button>
     </div>
 <!--    <div>-->
@@ -74,18 +92,6 @@
 <!--        <input v-model="minFilter" type="range" min="1" max="100" class="slider" id="min">-->
 <!--        <input v-model="maxFilter" type="range" min="1" max="100" class="slider" id="max">-->
 <!--    </div>-->
-</div>
-<div id="chat">
-    <ul id="messages"></ul>
-    <form action="" onsubmit="sendMessage()">
-        <!--            <div class="gorm-group">-->
-        <!--                <label for="user">User:</label>-->
-        <!--                <input type="text" v-model="user" class="form-control">-->
-        <!--            </div>-->
-            <label for="message"></label>
-            <input type="text" id="message" autocomplete="off" />
-        <button id="chat-button">Send</button>
-    </form>
 </div>
 </div>
 </div>
@@ -157,11 +163,16 @@
             let sync_color = p5.color('#76BEFF')
             let antisync_color = p5.color('#FF76E9')
             let band_color = p5.color('#7373FF')
+            let canvas;
 
 
             p5.setup = () => {
-                let canvas = p5.createCanvas(p5.windowWidth - 350, p5.windowHeight);
+                canvas = p5.createCanvas(p5.windowWidth, p5.windowHeight);
                 canvas.parent("p5Canvas");
+            }
+
+            p5.windowResized = () => {
+                p5.resizeCanvas(p5.windowWidth, p5.windowHeight);
             }
 
             p5.draw = () => {
