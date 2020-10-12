@@ -27,8 +27,11 @@ h3{
     font-weight: 400;
 }
 
-button {width: 200px; height: 50px; cursor: pointer; color: whitesmoke;
+button {width: 200px; min-height: 50px; cursor: pointer; color: whitesmoke;
     font-family : inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: transparent;
     margin: 0px 20px 20px 0px;
     border: 1px solid whitesmoke;
@@ -140,7 +143,7 @@ a.link:before {
     left: 0;
     background-color: white;
     visibility: hidden;
-    transition: all 0.3s ease-in-out;
+    transition: all 0.5s ease-in-out;
 }
 
 a.link:hover:before {
@@ -476,7 +479,7 @@ a.link.router-link-exact-active {
     left: 0;
     background-color: white;
     visibility: hidden;
-    transition: all 0.3s ease-in-out;
+    transition: all 0.5s ease-in-out;
 }
 
 .social a:hover:before {
@@ -495,6 +498,75 @@ a.link.router-link-exact-active {
     height:calc(100vh - 225px);
     justify-content: center;
     align-items: center;
+}
+
+/* App Nav */
+
+#app-nav {
+    height: 100%;
+    width: 200px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    align-content: flex-start;
+
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+    position: fixed;
+    top: 0;
+    left: -200px;
+    transition: left 0.5s ease-in-out;
+    -o-transition: left 0.5s ease-in-out;
+    -ms-transition: left 0.5s ease-in-out;
+    -moz-transition: left 0.5s ease-in-out;
+    -webkit-transition: left 0.5s ease-in-out;
+}
+
+#app-nav img{
+    padding: 20px;
+    cursor: pointer;
+}
+
+#toggle{
+    position: absolute;
+    left: 200px;
+    height: 100%;
+    padding: 10px;
+    background: #ccc;
+}
+
+#app-nav:hover{
+    left: 0px;
+}
+
+.icon{
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 20px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.5s;
+    background: transparent;
+}
+
+.icon:hover{
+    background: #111111;
+}
+
+button i {
+    margin-right: 20px;
+}
+
+.icon p{
+    margin-left: 10px;
+    font-size: 10px;
+}
+
+.icon a:visited{
+    color: white;
 }
 
 /* Brainstorm */
@@ -520,7 +592,7 @@ a.link.router-link-exact-active {
     left: 0; height: 100%; z-index:2;
     display: flex; flex-wrap: wrap; justify-content:center;
     align-items: center; opacity: .9;
-    transition: 2s;
+    transition: 0.5s;
 
 }
 
@@ -564,8 +636,8 @@ a.link.router-link-exact-active {
     background: #d3d3d3;
     outline: none;
     opacity: 1;
-    -webkit-transition: .2s;
-    transition: opacity .2s;
+    -webkit-transition: .5s;
+    transition: opacity .5s;
 }
 
 .slider:hover {
@@ -603,8 +675,17 @@ form input:focus{
     outline: none;
 }
 form button {flex-grow: 1; width: auto;}
+
 #messages {width: 100%; margin: 0; padding: 0px; height: 85vh;
     list-style-type: none; text-align: left; overflow: scroll;}
+#messages::-webkit-scrollbar {
+    display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+#messages {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
 #messages li { flex-grow: 1; padding: 5px 10px; color: whitesmoke;}
 #messages li:nth-child(odd) { background: rgb(15,15,15)}
 

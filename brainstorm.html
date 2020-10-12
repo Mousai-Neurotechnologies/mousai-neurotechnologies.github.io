@@ -13,37 +13,55 @@
     <script src="https://cdn.jsdelivr.net/npm/bcijs@1.8.0/dist/bci.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+
     <title>Brainstorm</title>
 </head>
-<body onload="initialize()">
+<body onload="initialize()" style="overflow: hidden">
 <noscript>
     <strong>We're sorry but Mousai Neurotechnologies doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
 </noscript>
 
 <div id=app>
+
+    <!--Navbar-->
+    <div id="app-nav">
+        <div id="toggle"></div>
+        <img src="assets/logo_long.png"/>
+        </a>
+        <div class="icon" onclick="openTutorial()">
+        <a><i class="fas fa-book-open fa-3x"></i></a><p>Tutorial</p>
+        </div>
+        <div class="icon" onclick="generateSignal()">
+        <a><i class="fas fa-wave-square fa-3x"></i></a><p>Send Signal</p>
+        </div>
+    </div>
+
 <div id="brainstorm">
 <div>
     <div id="p5Canvas"></div>
 </div>
 <div id="tutorial">
     <div id="tutorial-text">
+        <i class="fas fa-brain fa-3x"></i>
         <h1>Welcome to Brainstorm!</h1>
         <div class="tut-div">
             <p>Experience a social neurotechnology platform that enables you to manage your brain data and couple with other minds across social, cultural, and political boundaries.</p>
         </div>
         <div id="'tut-buttons">
-            <button id="close-tutorial" onclick="closeTutorial()">Close Tutorial</button>
-            <div class="break"></div>
-            <button class="gray-button"  onclick="window.location.href='./index.html'">Back to Main Site</button>
+            <button id="close-tutorial" class="blue-button" onclick="closeTutorial()">
+                <i class="fas fa-book fa-2x"></i>
+                Close Tutorial
+            </button>
         </div>
     </div>
 </div>
 <div id="parameters">
-    <div>
-        <button id="open-tutorial" onclick="openTutorial()">Open Tutorial</button>
-        <button class="gray-button" onclick="window.location.href='./index.html'">Back to Main Site</button>
-        <button class="purple-button"  onclick="generateSignal()">Generate Signal</button>
-    </div>
+<!--    <div>-->
+<!--        <button id="open-tutorial" onclick="openTutorial()">Open Tutorial</button>-->
+<!--        <button class="gray-button" onclick="window.location.href='./index.html'">Back to Main Site</button>-->
+<!--        <button class="purple-button"  onclick="generateSignal()">Generate Signal</button>-->
+<!--    </div>-->
 <!--    <div>-->
 <!--        <p>Frequency: {{ rangeSlider }}</p>-->
 <!--        <input v-model="rangeSlider" type="range" min="1" max="100" class="slider" id="myRange">-->
