@@ -8,7 +8,7 @@ set -e
 
 git init
 git add -A
-git commit -m 'committed'
+git commit -m 'added high-resolution GIF'
 
 # if you are deploying to https://<USERNAME>.github.io
  git push -f git@github.com:mousai-neurotechnologies/mousai-neurotechnologies.github.io.git master
