@@ -510,6 +510,7 @@ a.link.router-link-exact-active {
     justify-content: center;
     align-items: flex-start;
     align-content: flex-start;
+    z-index:2;
 
     background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
     position: fixed;
@@ -529,10 +530,15 @@ a.link.router-link-exact-active {
 
 #toggle{
     position: absolute;
+    /*display: flex;*/
+    /*justify-content: center;*/
+    /*align-items: center;*/
     left: 200px;
-    height: 100%;
-    padding: 10px;
-    background: #222222;
+    background: transparent;
+}
+
+#toggle .icon:hover{
+    background: transparent;
 }
 
 #app-nav:hover{
