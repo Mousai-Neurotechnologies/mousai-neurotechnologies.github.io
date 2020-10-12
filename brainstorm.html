@@ -40,9 +40,9 @@
 </div>
 <div id="parameters">
     <div>
-    <button class="home-button" onclick="window.location.href='./index.html'">Back to Main Site</button>
-    <button id="open-tutorial" onclick="openTutorial()">Open Tutorial</button>
-    <button class="purple-button"  onclick="generateSignal()">Generate Signal</button>
+        <button id="open-tutorial" onclick="openTutorial()">Open Tutorial</button>
+        <button class="gray-button" onclick="window.location.href='./index.html'">Back to Main Site</button>
+        <button class="purple-button"  onclick="generateSignal()">Generate Signal</button>
     </div>
 <!--    <div>-->
 <!--        <p>Frequency: {{ rangeSlider }}</p>-->
@@ -135,6 +135,7 @@
             let synchrony;
             let sync_color = p5.color('#76BEFF')
             let antisync_color = p5.color('#FF76E9')
+            let band_color = p5.color('#7373FF')
 
 
             p5.setup = () => {
@@ -222,6 +223,8 @@
                         squareColor.setAlpha(255 * (bandpowers[band]));
                         p5.fill(squareColor)
                         p5.text(band_names[band] + ' ' + band_meaning[band], (band + .5) * (p5.width / band_names.length), pos - 20)
+                        band_color.setAlpha(200 * (bandpowers[band]));
+                        p5.fill(band_color)
                         p5.rectMode(p5.CORNERS);
                         p5.rect(band * (p5.width / (band_names.length)), p5.height / 2, (band + 1) * (p5.width / (band_names.length)), pos)
                     }
@@ -233,8 +236,10 @@
                     console.log(synchrony)
                     if (synchrony != 1 && !isNaN(synchrony)) {
                         if (synchrony > 0) {
+                            sync_color.setAlpha(200*Math.abs(synchrony))
                             p5.fill(sync_color)
                         } else {
+                            antisync_color.setAlpha(200*Math.abs(synchrony))
                             p5.fill(antisync_color)
                         }
                         p5.ellipse(5 * p5.width / 6, -p5.height / 4, synchrony * 50, synchrony * 50);
