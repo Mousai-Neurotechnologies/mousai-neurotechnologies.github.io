@@ -523,7 +523,7 @@ a.link.router-link-exact-active {
 }
 
 #app-nav img{
-    padding: 20px;
+    padding: 20px 0px 10px 0px;
     cursor: pointer;
 }
 
@@ -532,7 +532,7 @@ a.link.router-link-exact-active {
     left: 200px;
     height: 100%;
     padding: 10px;
-    background: #ccc;
+    background: #222222;
 }
 
 #app-nav:hover{
@@ -610,9 +610,10 @@ button i {
 }
 
 #parameters{
-    position: fixed; width: 500px; background: transparent;
+    position: fixed; width: calc(100% - 350px); background: transparent;
     top: 0px; left: 0px; padding: 0px;
 }
+
 #parameters div{
     display: flex;
     flex-wrap: wrap;
