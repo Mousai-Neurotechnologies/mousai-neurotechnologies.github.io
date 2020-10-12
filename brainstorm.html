@@ -210,7 +210,8 @@
                 // }
                 // let diff = diffs/(bt.length-1)
                 if (usr == 'me') {
-                    let band_names = ['alpha', 'beta', 'theta', 'gamma']
+                    let band_names = ['delta', 'theta', 'alpha', 'beta', 'gamma']
+                    let band_meaning = ['(1-3 Hz)','(4-7 Hz)','(8-12 Hz)','(13-30 Hz)','(31-50 Hz)']
                     let bandpowers = bci.bandpower(y_filtered, samplerate, band_names, {relative: true});
                     let pos;
                     p5.noStroke()
@@ -220,7 +221,7 @@
                         pos = (p5.height / 2) - (p5.height / 4) * (bandpowers[band])
                         squareColor.setAlpha(255 * (bandpowers[band]));
                         p5.fill(squareColor)
-                        p5.text(band_names[band], (band + .5) * (p5.width / band_names.length), pos - 20)
+                        p5.text(band_names[band] + ' ' + band_meaning[band], (band + .5) * (p5.width / band_names.length), pos - 20)
                         p5.rectMode(p5.CORNERS);
                         p5.rect(band * (p5.width / (band_names.length)), p5.height / 2, (band + 1) * (p5.width / (band_names.length)), pos)
                     }
