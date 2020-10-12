@@ -637,6 +637,10 @@ button i {
     top: 0px; left: 0px; padding: 0px;
 }
 
+#parameters button{
+    margin: 0px;
+}
+
 #parameters div{
     display: flex;
     flex-wrap: wrap;
