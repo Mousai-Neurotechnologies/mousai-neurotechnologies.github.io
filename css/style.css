@@ -1,6 +1,6 @@
 /*App and Nav*/
 
-html, body{
+body{
     margin: 0px;
     background: black;
 }
@@ -26,8 +26,35 @@ h3{
     font-weight: 400;
 }
 
-button {width: 100%; height: 50px; cursor: pointer; color: white;
-    background: #7373FF; border: none; padding: 10px; font-weight: bold;}
+button {width: 200px; height: 50px; cursor: pointer; color: whitesmoke;
+    background: transparent; font-weight: bold;
+    margin: 0px 20px 20px 0px;
+    border: 1px solid whitesmoke;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: 0.5s;}
+
+button:hover{
+    color: #FF76E9;
+    border-color: #FF76E9;
+}
+
+.purple-button{
+    border-color: #7373FF;
+    color: #7373FF;
+}
+
+.blue-button{
+    border-color: #50B5FF;
+    color: #50B5FF;
+}
+
+.gray-button{
+    border: 1px solid #888888;
+    color: #888888;
+}
+
+
 
 section{
     color: white;
@@ -168,22 +195,6 @@ a.link.router-link-exact-active {
 
 .buttons {
     margin: 50px 0px;
-}
-
-.button {
-    margin: 0px 20px 20px 0px;
-    padding: 10px 20px;
-    /* background: #FF76E9; */
-    color: whitesmoke;
-    text-decoration: none;
-    border: 1px solid whitesmoke;
-    border-radius: 5px;
-    transition: 0.5s;
-}
-
-.button:hover{
-    color: #FF76E9;
-    border-color: #FF76E9;
 }
 
 /* Page Header */
@@ -496,6 +507,11 @@ a.link.router-link-exact-active {
     font-size: 15px;
 }
 
+#tut-buttons{
+    display: flex;
+    flex-wrap: wrap;
+}
+
 #tutorial{
     width: 100%; background: rgb(0,0,0);
     position: fixed; top: 0;
@@ -511,16 +527,6 @@ a.link.router-link-exact-active {
     display: flex; flex-wrap: wrap; justify-content:center;
     align-items: center;}
 
-#open-tutorial{
-    width: 100%; border-radius: 0px; height: 50px; cursor: pointer; color: white; background: #50B5FF
-; border: none; padding: 10px;
-}
-
-#close-tutorial{
-    width: 250px; border-radius: 0px; height: 50px; cursor: pointer; color: white; background: #50B5FF
-; border: none; padding: 10px;
-}
-
 .tut-div{
     width: 500px;
 }
@@ -530,7 +536,7 @@ a.link.router-link-exact-active {
 }
 
 #parameters{
-    position: fixed; width: 250px; background: rgb(25,25,25);
+    position: fixed; width: 500px; background: transparent;
     top: 0px; left: 0px; padding: 0px;
 }
 #parameters div{
@@ -543,6 +549,10 @@ a.link.router-link-exact-active {
 #parameters input{
     margin: 10px;
     flex-grow: 1;
+}
+
+#chat-button{
+    margin: 20px;
 }
 
 .slider {
@@ -576,7 +586,7 @@ a.link.router-link-exact-active {
     cursor: pointer;
 }
 
-#chat {width: 300px; background: rgb(5,5,5);
+#chat {width: 350px; background: rgb(5,5,5);
     position: fixed; top: 0;
     right: 0; z-index:1;
     display: flex; flex-wrap: wrap; justify-content:center;
@@ -591,7 +601,8 @@ form input:focus{
     outline: none;
 }
 form button {flex-grow: 1; width: auto;}
-#messages {width: 100%; margin: 0; padding: 0px; height: 85vh; list-style-type: none; text-align: left; }
+#messages {width: 100%; margin: 0; padding: 0px; height: 85vh;
+    list-style-type: none; text-align: left; overflow: scroll;}
 #messages li { flex-grow: 1; padding: 5px 10px; color: whitesmoke;}
 #messages li:nth-child(odd) { background: rgb(15,15,15)}
 

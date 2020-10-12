@@ -31,12 +31,19 @@
         <div class="tut-div">
             <p>Experience a social neurotechnology platform that enables you to manage your brain data and couple with other minds across social, cultural, and political boundaries.</p>
         </div>
+        <div id="'tut-buttons">
             <button id="close-tutorial" onclick="closeTutorial()">Close Tutorial</button>
+            <div class="break"></div>
+            <button class="gray-button"  onclick="window.location.href='./index.html'">Back to Main Site</button>
+        </div>
     </div>
 </div>
 <div id="parameters">
+    <div>
+    <button class="home-button" onclick="window.location.href='./index.html'">Back to Main Site</button>
     <button id="open-tutorial" onclick="openTutorial()">Open Tutorial</button>
-    <button onclick="generateSignal()">Generate Signal</button>
+    <button class="purple-button"  onclick="generateSignal()">Generate Signal</button>
+    </div>
 <!--    <div>-->
 <!--        <p>Frequency: {{ rangeSlider }}</p>-->
 <!--        <input v-model="rangeSlider" type="range" min="1" max="100" class="slider" id="myRange">-->
@@ -56,7 +63,7 @@
         <!--            </div>-->
             <label for="message"></label>
             <input type="text" id="message" autocomplete="off" />
-        <button>Send</button>
+        <button id="chat-button">Send</button>
     </form>
 </div>
 </div>
@@ -125,10 +132,11 @@
             let y_package
             let label_package = ['me', 'other'];
             let color_package = [p5.color('#7373FF'), p5.color('#76BEFF')]
+            let synchrony;
 
 
             p5.setup = () => {
-                let canvas = p5.createCanvas(p5.windowWidth - 300, p5.windowHeight);
+                let canvas = p5.createCanvas(p5.windowWidth - 350, p5.windowHeight);
                 canvas.parent("p5Canvas");
             }
 
@@ -143,6 +151,12 @@
                 time_package = [passed_time, passed_time];
                 y_package = [yvalues, other_yvalues];
                 basetime_package = [basetime, other_basetime]
+
+                // if ((Array.isArray(signal) && signal.length) && (Array.isArray(passed_signal) && passed_signal.length)){
+                synchrony = 450-eucDistance(yvalues,other_yvalues)
+                // }
+
+
                 processSignal(signal_package, time_package, y_package, basetime_package, label_package, color_package)
             }
 
@@ -196,18 +210,32 @@
                 if (usr == 'me') {
                     let band_names = ['alpha', 'beta', 'theta', 'gamma']
                     let bandpowers = bci.bandpower(y_filtered, samplerate, band_names, {relative: true});
-                    let val;
+                    let pos;
                     p5.noStroke()
-                    p5.fill('white')
+                    let squareColor = p5.color(255, 255, 255);
+                    p5.textAlign(p5.CENTER, p5.BOTTOM);
                     for (let band = 0; band < bandpowers.length; band++) {
-                        val = Math.round(bandpowers[band])
-                        if (isNaN(val)) {
-                            p5.text(band_names[band] + ' : ' + 0, 300, 125 - p5.height / 2 + 20 * band)
-                        } else {
-                            p5.text(band_names[band] + ' : ' + Math.round(bandpowers[band]), 300, 125 - p5.height / 2 + 20 * band)
-                        }
+                        pos = (p5.height/2) - (p5.height/4)*(bandpowers[band])
+                        squareColor.setAlpha(255*(bandpowers[band]));
+                        p5.fill(squareColor)
+                        p5.text(band_names[band], (band+.5)*(p5.width/band_names.length), pos - 20)
+                        p5.rectMode(p5.CORNERS);
+                        p5.rect(band*(p5.width/(band_names.length)), p5.height/2,(band+1)*(p5.width/(band_names.length)),pos)
+                    }
+
+                    // Calculate Synchrony
+                    console.log(synchrony)
+                    squareColor.setAlpha(255);
+                    p5.fill(squareColor)
+                    p5.text('Euclidean Distance', 5*p5.width / 6, (-p5.height / 4) + 50)
+                    if (synchrony < 0 && (synchrony != 450)) {
+                        squareColor.setAlpha(255 * (bandpowers[0]));
+                        p5.fill(squareColor)
+                        p5.ellipse(5*p5.width / 6, -p5.height / 4, synchrony / 10, synchrony / 10);
                     }
                 }
+
+
             }
 
             function processSignal(sig, t, yvals, bt, usr, col) {
@@ -218,6 +246,13 @@
                 return sig, t, yvals, bt
             }
         })
+
+        function eucDistance(a, b) {
+            return a
+                    .map((x, i) => Math.abs( x - b[i] ) ** 2) // square the difference
+                    .reduce((sum, now) => sum + now) // sum
+                ** (1/2)
+        }
     }
 </script>
 
