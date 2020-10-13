@@ -8,7 +8,7 @@ set -e
 
 git init
 git add -A
-git commit -m 'added high-resolution GIF'
+git commit -m 'major UI overhaul for Brainstorm'
 
 # if you are deploying to https://<USERNAME>.github.io
  git push -f git@github.com:mousai-neurotechnologies/mousai-neurotechnologies.github.io.git master
