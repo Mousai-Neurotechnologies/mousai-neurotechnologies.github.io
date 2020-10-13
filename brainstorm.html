@@ -73,10 +73,18 @@
 </div>
 <div id="parameters">
     <div>
-    <button class="purple-button" onclick="generateSignal()">
+    <button onclick="sendSignal(channels)">
         <i class="fas fa-wave-square fa-2x"></i>
-        Send Signal
+        <p>Send Signal</p>
     </button>
+        <button id="auto-generate" onclick="generateSignal()">
+            <i class="fas fa-play-circle fa-2x"></i>
+            <p>Autoplay Signal</p>
+        </button>
+        <div id="synchrony-div">
+            <p>Synchrony</p>
+            <div><span id = 'sync-dot' class="dot"></span></div>
+        </div>
     </div>
 <!--    <div>-->
 <!--        <button id="open-tutorial" onclick="openTutorial()">Open Tutorial</button>-->
@@ -97,18 +105,34 @@
 </div>
 
 <script>
-    let yvalues = new Array(200).fill(0);
-    let other_yvalues = new Array(yvalues.length).fill(0);
-    let basetime = new Array(yvalues.length).fill(Date.now());
-    let other_basetime = new Array(yvalues.length).fill(Date.now());
+    let channels = 1;
+    let duration = 1 // seconds
+
+    let samplerate = 125; // This is almost definitely wrong
+    let generate_interval = Math.round(duration*samplerate); // seconds
+    let count = 0;
+
+    let max_dy = 50;
+
+    let generate = false;
+
+    let yvalues = new Array(channels);
+    let other_yvalues = new Array(channels);
+
+    for (let chan = 0; chan < channels; chan++){
+        yvalues[chan] = new Array(200).fill(0);
+        other_yvalues[chan] = new Array(200).fill(0);
+    }
+
+
+    let basetime = new Array(200).fill(Date.now());
+    let other_basetime = new Array(200).fill(Date.now());
 
     let signal = [];
 
-    let samplerate = 125; // This is almost definitely wrong
-
     let rangeSlider = 10
 
-    let filterOrder = 128;
+    // let filterOrder = 128;
 
     let messages = []
     let socket = io.connect(('https://mousai.azurewebsites.net/'))
@@ -147,6 +171,7 @@
         new p5(function (p5) {
             // let start_time = Date.now();
             let first_sig = true;
+            let alt_sig = new Array(channels);
             let in_min
             let in_max
             let out_min
@@ -159,11 +184,14 @@
             let y_package
             let label_package = ['me', 'other'];
             let color_package = [p5.color('#7373FF'), p5.color('#76BEFF')]
+            let band_color = [p5.color('#7373FF'), p5.color('#76BEFF')];
+            let this_band_color;
             let synchrony;
             let sync_color = p5.color('#76BEFF')
             let antisync_color = p5.color('#FF76E9')
-            let band_color = p5.color('#7373FF')
             let canvas;
+
+            let bandpowers;
 
 
             p5.setup = () => {
@@ -178,36 +206,46 @@
             p5.draw = () => {
                 p5.background(0);
                 p5.translate(0, p5.height / 2);
-                if (signal.length > 0) {
-                    signal_package = [signal[0], passed_signal];
-                } else {
-                    signal_package = [signal, passed_signal];
-                }
+                signal_package = [signal, passed_signal];
                 time_package = [passed_time, passed_time];
                 y_package = [yvalues, other_yvalues];
                 basetime_package = [basetime, other_basetime]
 
-                // if ((Array.isArray(signal) && signal.length) && (Array.isArray(passed_signal) && passed_signal.length)){
-                synchrony = getPearsonCorrelation(yvalues, other_yvalues)
+                // Only correlation of first channels
+                synchrony = getPearsonCorrelation(yvalues[0], other_yvalues[0])
+
+                // if (count == 1) {
+                //     samplerate = p5.frameRate(); // This is almost definitely wrong
+                //     console.log(samplerate)
                 // }
 
+                // generate_interval = Math.round(duration*samplerate); // seconds
+                if (generate) {
+                if (count == generate_interval){
+                    sendSignal(channels)
+                    count = 0;
+                } else {
+                    count += 1
+                }}
 
                 processSignal(signal_package, time_package, y_package, basetime_package, label_package, color_package)
             }
 
             function calcWave(sig, t, yvals, bt) {
                 bt.shift();
-                yvals.shift();
-                if (sig.length > 0) {
-                    if (first_sig) {
-                        // start_time = Date.now();
-                        first_sig = false;
+                bt.push(Date.now())
+
+                for (let chan in sig){
+                    yvals[chan].shift();
+                    if (sig[chan].length > 0) {
+                        if (first_sig) {
+                            // start_time = Date.now();
+                            first_sig = false;
+                        }
+                        yvals[chan].push(sig[chan].shift())
+                    } else {
+                        yvals[chan].push(0)
                     }
-                    yvals.push(sig.shift())
-                    bt.push(Date.now()) //start_time + t.shift())
-                } else {
-                    yvals.push(0)
-                    bt.push(Date.now()) // bt.push(Date.now()-start_time)
                 }
 
                 return sig, t, yvals, bt
@@ -219,7 +257,10 @@
 
                 // Filter
                 let y_filtered = yvals //filterSignal(yvals)
-
+                let offset;
+                let margin = 100;
+                max_dy = (p5.height - 2*margin) / channels;
+                let dy = 200;
 
                 // Map to Window Size
                 p5.stroke(c);
@@ -230,51 +271,74 @@
                 out_max = p5.width;
                 t_inner = bt.map(x => (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
 
-                for (let ind = 0; ind < y_filtered.length - 1; ind++) {
-                    y1 = y_filtered[ind]
+                if (dy > max_dy){dy = max_dy;}
+
+                for (let chan in y_filtered) {
                     p5.push()
                     p5.scale(1, -1);
-                    p5.line(t_inner[ind], y1, t_inner[ind + 1], y_filtered[ind + 1]);
+                    y1 = y_filtered[chan]
+                    offset = dy*((channels-1)/2) - ((chan * dy));
+                    // offset = (p5.height / 2 - margin) - (chan * (p5.height - 2*margin) / channels) + channels/2;
+                    for (let ind = 0; ind < y_filtered[chan].length - 1; ind++) {
+                        p5.line(t_inner[ind], y1[ind] + offset, t_inner[ind + 1], y1[ind + 1] + offset);
+                    }
                     p5.pop()
                 }
-                // let diffs = 0;
-                // for (let ii = 0; ii < bt.length-1;ii++){
-                //     diffs += (bt[ii+1] - bt[ii])
-                // }
-                // let diff = diffs/(bt.length-1)
+
+
+                // Plot Bands
+                let power;
+                let label;
+                let band_names = ['delta', 'theta', 'alpha', 'beta', 'gamma']
+                let band_meaning = ['(1-3 Hz)','(4-7 Hz)','(8-12 Hz)','(13-30 Hz)','(31-50 Hz)']
+
+                p5.noStroke()
+                let squareColor = p5.color(255, 255, 255);
+                p5.textAlign(p5.CENTER, p5.BOTTOM);
                 if (usr == 'me') {
-                    let band_names = ['delta', 'theta', 'alpha', 'beta', 'gamma']
-                    let band_meaning = ['(1-3 Hz)','(4-7 Hz)','(8-12 Hz)','(13-30 Hz)','(31-50 Hz)']
-                    let bandpowers = bci.bandpower(y_filtered, samplerate, band_names, {relative: true});
-                    let pos;
-                    p5.noStroke()
-                    let squareColor = p5.color(255, 255, 255);
-                    p5.textAlign(p5.CENTER, p5.BOTTOM);
-                    for (let band = 0; band < bandpowers.length; band++) {
-                        pos = (p5.height / 2) - (p5.height / 4) * (bandpowers[band])
-                        squareColor.setAlpha(255 * (bandpowers[band]));
+                    this_band_color = band_color[0]
+                } else {
+                    this_band_color = band_color[1]
+                }
+
+                for (let band = 0; band < band_names.length; band++) {
+                    try {
+                        power = bci.bandpower(y_filtered[0], samplerate, band_names[band], {relative: true});
+                        label = band_names[band] + ' ' + band_meaning[band]
+                    } catch {
+                        label = 'sample rate too low'
+                        this_band_color = p5.color('#FF76E9');
+                        power = 1
+                    }
+                        power = (p5.height / 2) - (p5.height / 4) * (power)
+                        squareColor.setAlpha(255 * (power));
                         p5.fill(squareColor)
-                        p5.text(band_names[band] + ' ' + band_meaning[band], (band + .5) * (p5.width / band_names.length), pos - 20)
-                        band_color.setAlpha(200 * (bandpowers[band]));
-                        p5.fill(band_color)
+                        p5.text(label, (band + .5) * (p5.width / band_names.length), power - 20);
+                        this_band_color.setAlpha(200 * (power));
+                        p5.fill(this_band_color)
                         p5.rectMode(p5.CORNERS);
-                        p5.rect(band * (p5.width / (band_names.length)), p5.height / 2, (band + 1) * (p5.width / (band_names.length)), pos)
+                        p5.rect(band * (p5.width / (band_names.length)), p5.height / 2, (band + 1) * (p5.width / (band_names.length)), power)
                     }
 
-                    squareColor.setAlpha(255);
-                    p5.fill(squareColor)
-                    // Calculate Synchrony
-                    p5.text('Synchrony', p5.width / 2, (-p5.height / 4) + 50);
-                    console.log(synchrony)
+                // Plot Synchrony
+                if (usr == 'me') {
+                    // squareColor.setAlpha(255);
+                    // p5.fill(squareColor)
                     if (synchrony != 1 && !isNaN(synchrony)) {
                         if (synchrony > 0) {
-                            sync_color.setAlpha(200*Math.abs(synchrony))
-                            p5.fill(sync_color)
+                            document.getElementById('sync-dot').style.backgroundColor = sync_color;
                         } else {
-                            antisync_color.setAlpha(200*Math.abs(synchrony))
-                            p5.fill(antisync_color)
+                            document.getElementById('sync-dot').style.backgroundColor = antisync_color;
                         }
-                        p5.ellipse(5 * p5.width / 6, -p5.height / 4, synchrony * 50, synchrony * 50);
+
+                        console.log((synchrony * 50).toString() + 'px')
+                        document.getElementById('sync-dot').style.width = (synchrony * 50).toString() + 'px';
+                        document.getElementById('sync-dot').style.height = (synchrony * 50).toString() + 'px';
+                        // p5.ellipse(2*p5.width / 3, -p5.height / 4, synchrony * 50, synchrony * 50);
+                    } else{
+                        document.getElementById('sync-dot').style.height = '0px';
+                        document.getElementById('sync-dot').style.width = '0px';
+
                     }
                 }
             }

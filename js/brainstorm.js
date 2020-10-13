@@ -5,23 +5,37 @@
 //     return false;
 // }
 
-function generateSignal() {
+function generateSignal(){
+    generate = !generate;
+    sendSignal(channels);
+
+    if ( generate ){
+    document.getElementById('auto-generate').innerHTML = "<i class=\"fas fa-pause-circle fa-2x\"></i>\n" +
+        "<p>Stop Autoplay</p>"
+    } else {
+        document.getElementById('auto-generate').innerHTML = "<i class=\"fas fa-play-circle fa-2x\"></i>\n" +
+            "<p>Autoplay Signal</p>"
+    }
+}
+
+function sendSignal(channels) {
     // Generate 1 second of sample data at 512 Hz
     // Contains 8 μV / 8 Hz and 4 μV / 17 Hz
-    signal = [];
-    let len = 1
-    let channels = [0,1]
-    for (let channel in channels) {
-        if (channel==0){
-            signal = [bci.generateSignal([59], [rangeSlider], samplerate, len)];
-        } else {
-            signal.push(bci.generateSignal([59], [rangeSlider], samplerate, len));
-        }
+
+    let len = duration // seconds
+
+    signal = new Array(channels);
+    for (let channel =0; channel < channels; channel++) {
+        signal[channel] = bci.generateSignal([max_dy/4], [(channel+1)*3], samplerate, len);
+        // signal[channel] = bci.generateSignal([10], [rangeSlider], samplerate, len);
+
     }
     // signal = this.filterSignal(signal)
+    // signal = bci.generateSignal([59], [rangeSlider]+10, samplerate, len);
+
 
     let data = {
-        signal: signal[0],
+        signal: signal,
         time: basetime
     }
 

@@ -653,6 +653,28 @@ button i {
     flex-grow: 1;
 }
 
+#synchrony-div{
+    display: flex;
+    justify-content:flex-start;
+    align-items: center;
+    width: 200px;
+    text-align: left;
+}
+
+#synchrony-div div {
+    border: 2px solid white;
+    height: 50px;
+    width: 50px;
+}
+
+.dot{
+    height: 25px;
+    width: 25px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+}
+
 #chat-button{
     margin: 20px;
 }
