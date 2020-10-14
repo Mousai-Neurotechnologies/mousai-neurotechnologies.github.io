@@ -561,7 +561,7 @@ a.link.router-link-exact-active {
 .toggle {
     position: absolute;
     background: transparent;
-    height: 100%;
+    /*height: 100%;*/
 }
 
 .toggle .icon:hover{
