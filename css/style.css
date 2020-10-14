@@ -53,6 +53,18 @@ button:hover{
     border-color: #FF76E9;
 }
 
+.debug {
+    background: red;
+}
+
+.flex{
+    display: flex;
+}
+
+.wrap{
+    flex-wrap: wrap;
+}
+
 .purple-button{
     border-color: #7373FF;
     color: #7373FF;
@@ -639,7 +651,7 @@ button i {
 
 #parameters{
     position: fixed; width: 100%; background: transparent;
-    top: 0px; left: 0px; padding: 0px;
+    top: 0px; left: 0px; margin: 20px 50px;
 }
 
 #parameters button{
@@ -653,9 +665,15 @@ button i {
     align-items: center;
     margin: 20px 10px;
 }
-#parameters input{
-    margin: 10px;
-    flex-grow: 1;
+
+#parameters select{
+    background: transparent;
+    color: white;
+    border: none;
+}
+
+.bound{
+    width: 200px;
 }
 
 #synchrony-div{
@@ -684,11 +702,18 @@ button i {
     margin: 20px;
 }
 
+
+#freq-range{
+
+}
+
 .slider {
     -webkit-appearance: none;
-    width: 100%;
+    width: 200px;
     height: 25px;
-    background: #d3d3d3;
+    background: transparent;
+    overflow: hidden;
+    border-radius: 5px;
     outline: none;
     opacity: 1;
     -webkit-transition: .5s;
@@ -704,8 +729,15 @@ button i {
     appearance: none;
     width: 25px;
     height: 25px;
+    box-shadow: -100vw 0 0 100vw #7373FF;
     background: #7373FF;
     cursor: pointer;
+    transition: .5s;
+}
+
+.slider::-webkit-slider-thumb:hover {
+    box-shadow: -100vw 0 0 100vw #FF76E9;
+    background: #FF76E9;
 }
 
 .slider::-moz-range-thumb {
@@ -713,6 +745,10 @@ button i {
     height: 25px;
     background: #7373FF;
     cursor: pointer;
+}
+
+.slider::-moz-range-thumb:hover {
+    background: #FF76E9;
 }
 
 

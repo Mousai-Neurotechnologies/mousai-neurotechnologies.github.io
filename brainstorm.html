@@ -75,40 +75,67 @@
     </div>
 </div>
 <div id="parameters">
-    <div>
+    <div >
+        <div>
     <button onclick="sendSignal(channels)">
         <i class="fas fa-wave-square fa-2x"></i>
         <p>Send Signal</p>
     </button>
+        </div>
+        <div>
         <button id="auto-generate" onclick="generateSignal()">
             <i class="fas fa-play-circle fa-2x"></i>
             <p>Autoplay Signal</p>
         </button>
+        </div>
+        <div class="flex wrap bound center">
+            <p class="bound">Frequency: <span data-tw-bind="frequency">10</span></p>
+            <input data-tw-bind="frequency" value = '10' type="range" min="1" max="100" class="slider" id="freqRange">
+            <p class="bound">Channels</p>
+            <select name="channels" id="channels">
+                <option value="1">One</option>
+                <option value="8">Eight</option>
+                <option value="16">Sixteen</option>
+            </select>
+        </div>
         <div id="synchrony-div">
             <p>Synchrony</p>
             <div><span id = 'sync-dot' class="dot"></span></div>
         </div>
     </div>
-<!--    <div>-->
-<!--        <button id="open-tutorial" onclick="openTutorial()">Open Tutorial</button>-->
-<!--        <button class="gray-button" onclick="window.location.href='./index.html'">Back to Main Site</button>-->
-<!--        <button class="purple-button"  onclick="generateSignal()">Generate Signal</button>-->
-<!--    </div>-->
-<!--    <div>-->
-<!--        <p>Frequency: {{ rangeSlider }}</p>-->
-<!--        <input v-model="rangeSlider" type="range" min="1" max="100" class="slider" id="myRange">-->
-<!--    </div>-->
-<!--    <div>-->
-<!--        <p>Filter: {{ minFilter }} - {{ maxFilter }}</p>-->
-<!--        <input v-model="minFilter" type="range" min="1" max="100" class="slider" id="min">-->
-<!--        <input v-model="maxFilter" type="range" min="1" max="100" class="slider" id="max">-->
-<!--    </div>-->
 </div>
 </div>
 </div>
 
 <script>
     let channels = 1;
+    let new_chan = 1;
+
+    const selectElement = document.getElementById('channels');
+
+    selectElement.addEventListener('change', (event) => {
+        new_chan = parseFloat(event.target.value);
+        console.log(new_chan)
+        if (new_chan < channels) {
+            for (let chan = new_chan; chan < channels; chan++){
+                yvalues[chan] = [];
+                other_yvalues[chan] = [];
+            }
+        } else {
+            console.log('larger')
+            yvalues = [];
+            other_yvalues = [];
+            yvalues = new Array(new_chan);
+            other_yvalues = new Array(new_chan);
+
+            for (let chan = 0; chan < new_chan; chan++) {
+                yvalues[chan] = new Array(200).fill(0);
+                other_yvalues[chan] = new Array(200).fill(0);
+            }
+        }
+        channels = new_chan;
+    });
+
     let duration = 1 // seconds
 
     let samplerate = 125; // This is almost definitely wrong
@@ -132,8 +159,6 @@
     let other_basetime = new Array(200).fill(Date.now());
 
     let signal = [];
-
-    let rangeSlider = 10
 
     // let filterOrder = 128;
 
@@ -174,7 +199,6 @@
         new p5(function (p5) {
             // let start_time = Date.now();
             let first_sig = true;
-            let alt_sig = new Array(channels);
             let in_min
             let in_max
             let out_min
@@ -334,7 +358,6 @@
                             document.getElementById('sync-dot').style.backgroundColor = antisync_color;
                         }
 
-                        console.log((synchrony * 50).toString() + 'px')
                         document.getElementById('sync-dot').style.width = (synchrony * 50).toString() + 'px';
                         document.getElementById('sync-dot').style.height = (synchrony * 50).toString() + 'px';
                         // p5.ellipse(2*p5.width / 3, -p5.height / 4, synchrony * 50, synchrony * 50);
@@ -404,6 +427,50 @@
 
             return answer;
         }
+
+    // Two Way Data Binding
+    var elements = document.querySelectorAll('[data-tw-bind]'),
+    scope = {};
+    elements.forEach(function(element) {
+        //execute scope setter
+        if(element.type === 'text'|| element.type === 'textarea' || element.type === 'range'){
+            var propToBind = element.getAttribute('data-tw-bind');
+            addScopeProp(propToBind);
+            element.oninput = function(){
+                scope[propToBind] = element.value;
+            }
+
+            //bind prop to elements
+            function addScopeProp(prop){
+                //add property if needed
+                if(!scope.hasOwnProperty(prop)){
+                    //value to populate with newvalue
+                    var value;
+                    Object.defineProperty(scope, prop, {
+                        set: function (newValue) {
+                            value = newValue;
+                            elements.forEach(function(element){
+                                //change value to binded elements
+                                if(element.getAttribute('data-tw-bind') === prop){
+                                    if(element.type && (element.type === 'text' ||
+                                        element.type === 'textarea'||
+                                        element.type === 'range')){
+                                        element.value = newValue;
+                                    }
+                                    else if(!element.type){
+                                        element.innerHTML = newValue;
+                                    }
+                                }
+                            });
+                        },
+                        get: function(){
+                            return value;
+                        },
+                        enumerable: true
+                    });
+                }
+            }
+        }});
 </script>
 
 </body>

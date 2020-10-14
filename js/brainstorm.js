@@ -23,11 +23,12 @@ function sendSignal(channels) {
     // Contains 8 μV / 8 Hz and 4 μV / 17 Hz
 
     let len = duration // seconds
+    let base_freq = document.getElementById("freqRange").value
 
     signal = new Array(channels);
     for (let channel =0; channel < channels; channel++) {
-        signal[channel] = bci.generateSignal([max_dy/4], [(channel+1)*3], samplerate, len);
-        // signal[channel] = bci.generateSignal([10], [rangeSlider], samplerate, len);
+        signal[channel] = bci.generateSignal([max_dy/4], [base_freq], samplerate, len);
+        // signal[channel] = bci.generateSignal([10], [base_freq + (channel+1)*3], samplerate, len);
 
     }
     // signal = this.filterSignal(signal)
@@ -75,3 +76,4 @@ function openTutorial(){
         document.getElementById("tutorial").style.pointerEvents = 'auto';
     }, this.animationDelay + 10);
 }
+
