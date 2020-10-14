@@ -448,7 +448,7 @@ a.link.router-link-exact-active {
 
 #footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin: auto;
     height: 200px;
@@ -459,25 +459,30 @@ a.link.router-link-exact-active {
 #left-footer{
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    flex-grow: 2;
+}
+
+#left-footer p{
+    text-align: left;
+    flex-grow: 0;
 }
 
 #right-footer{
-    flex-grow: 3;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    text-align: right;
+    /*display: flex;*/
+    /*justify-content: space-between;*/
+    /*align-items: center;*/
 }
 
 .social {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     flex-grow: 1;
     flex-basis: 100%;
 }
+
 .social a {
     position: relative;
     cursor: pointer;
