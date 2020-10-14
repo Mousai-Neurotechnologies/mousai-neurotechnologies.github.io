@@ -75,18 +75,19 @@
     </div>
 </div>
 <div id="parameters">
+    <div id="param-toggle" class="toggle"><div class="icon"><i class="fas fa-magic fa-2x"></i></div></div>
     <div >
         <div>
-    <button onclick="sendSignal(channels)">
-        <i class="fas fa-wave-square fa-2x"></i>
-        <p>Send Signal</p>
-    </button>
+            <button onclick="sendSignal(channels)">
+                <i class="fas fa-wave-square fa-2x"></i>
+                <p>Send Signal</p>
+            </button>
         </div>
         <div>
-        <button id="auto-generate" onclick="generateSignal()">
-            <i class="fas fa-play-circle fa-2x"></i>
-            <p>Autoplay Signal</p>
-        </button>
+            <button id="auto-generate" onclick="generateSignal()">
+                <i class="fas fa-play-circle fa-2x"></i>
+                <p>Autoplay Signal</p>
+            </button>
         </div>
         <div class="flex wrap bound center">
             <p class="bound">Frequency: <span data-tw-bind="frequency">10</span></p>

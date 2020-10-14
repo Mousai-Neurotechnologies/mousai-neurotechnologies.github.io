@@ -557,23 +557,85 @@ a.link.router-link-exact-active {
     -webkit-transition: left 0.5s ease-in-out;
 }
 
+
 #app-menu img{
     padding: 20px 0px 10px 0px;
     cursor: pointer;
 }
 
+
 #menu-toggle{
     left: 200px;
+}
+
+#parameters{
+    position: fixed; width: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+    top: -250px; left: 0px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    transition: top 0.5s ease-in-out;
+    -o-transition: top 0.5s ease-in-out;
+    -ms-transition: top 0.5s ease-in-out;
+    -moz-transition: top 0.5s ease-in-out;
+    -webkit-transition: top 0.5s ease-in-out;
+}
+
+#parameters button{
+    margin: 0px;
+}
+
+#parameters div{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content:center;
+    align-items: center;
+    margin: 20px 10px;
+}
+
+#parameters select{
+    background: transparent;
+    color: white;
+    border: none;
 }
 
 #app-menu:hover{
     left: 0px;
 }
 
+#param-toggle{
+    top: 200px;
+}
+
+#parameters:hover{
+    top: 0;
+}
+
+#parameters:hover #param-toggle {
+    opacity: 0;
+}
+
+#app-menu:hover #menu-toggle {
+    opacity: 0;
+}
+
+#chat:hover #chat-toggle {
+    opacity: 0;
+}
+
+
+
 .toggle {
     position: absolute;
     background: transparent;
-    /*height: 100%;*/
+    transition: opacity 0.25s ease-in-out;
+    -o-transition: opacity 0.25s ease-in-out;
+    -ms-transition: opacity 0.25s ease-in-out;
+    -moz-transition: opacity 0.25s ease-in-out;
+    -webkit-transition: opacity 0.25s ease-in-out;
 }
 
 .toggle .icon:hover{
@@ -647,29 +709,6 @@ button i {
 
 .tut-div p{
     margin-right: 20px
-}
-
-#parameters{
-    position: fixed; width: 100%; background: transparent;
-    top: 0px; left: 0px; margin: 20px 50px;
-}
-
-#parameters button{
-    margin: 0px;
-}
-
-#parameters div{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content:center;
-    align-items: center;
-    margin: 20px 10px;
-}
-
-#parameters select{
-    background: transparent;
-    color: white;
-    border: none;
 }
 
 .bound{
