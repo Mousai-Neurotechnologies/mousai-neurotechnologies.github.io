@@ -41,7 +41,7 @@
     <div id="chat">
         <div id="chat-toggle" class="toggle"><div class="icon"><i class="fas fa-paper-plane fa-2x"></i></div></div>
         <ul id="messages"></ul>
-        <form action="" onsubmit="sendMessage()">
+        <form action="">
             <!--            <div class="gorm-group">-->
             <!--                <label for="user">User:</label>-->
             <!--                <input type="text" v-model="user" class="form-control">-->
@@ -163,7 +163,9 @@
     // let filterOrder = 128;
 
     let messages = []
-    let socket = io.connect(('https://mousai.azurewebsites.net/'))
+    let  url = 'https://brainsatplay.azurewebsites.net/'
+    // let url = 'http://localhost:80'
+    let socket = io.connect((url))
 
     $(function () {
         $('form').submit(function(e) {
