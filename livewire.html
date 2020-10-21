@@ -4,8 +4,8 @@
     <meta charset=utf-8>
     <meta http-equiv=X-UA-Compatible content="IE=edge">
     <meta name=viewport content="width=device-width,initial-scale=1">
-    <link rel=icon href=../assets/favicon.ico>
-    <link rel="stylesheet" type="text/css" href="../css/style.css"/>
+    <link rel=icon href=assets/favicon.ico>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
     <title>Mousai Neurotechnologies | Livewire</title>
 </head>
 <body>
@@ -15,14 +15,14 @@
 <div id=app>
     <!--Navbar-->
     <div id="nav">
-        <a href="index.html" class="img"><img alt="Vue logo" src="../assets/logo_long.png"></a>
+        <a href="index.html" class="img"><img alt="Vue logo" src="assets/logo_long.png"></a>
         <div id="links" class="stretch">
-            <a href="../index.html" class="link">Home</a>
-            <a href="../about.html" class="link">About</a>
-            <a href="../projects.html" class="link">Projects</a>
-            <a href="../contact.html" class="link">Contact</a>
+            <a href="index.html" class="link">Home</a>
+            <a href="about.html" class="link">About</a>
+            <a href="projects.html" class="link">Projects</a>
+            <a href="contact.html" class="link">Contact</a>
         </div>
-        <img style="opacity: 50%" alt="Vue logo" src="../assets/brand/badge.png">
+        <img style="opacity: 50%" alt="Vue logo" src="assets/brand/badge.png">
     </div>
 
     <!--Header-->
@@ -34,17 +34,23 @@
     <div id='event' class="about-section">
         <div class="about-left">
             <h2>The Event</h2>
-        </div>
-        <div class="about-right">
+            <div class="break"></div>
             <p>Livewire is a <strong>virtual entertainment event</strong> that combines neuroscience,
                 neuroethics, and interactive media for participatory technology design.</p>
         </div>
+        <div class="about-right">
+            <div class="center">
+                <iframe src="https://player.vimeo.com/video/467405213" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            </div>
+        </div>
     </div>
 
-    <section class="newsletter">
+
+    <!--Footer-->
+    <section id="footer">
         <div class="form-cont">
             <div id="newsletter-form">
-                <h3>Sign Up for Updates.</h3>
+                <h4>Subscribe to our Newsletter</h4>
                 <div class="break"></div>
                 <form class="input-div" action="https://mousaineuro.us17.list-manage.com/subscribe/post" method="POST">
                     <div class="input-cont">
@@ -54,16 +60,25 @@
                         <input class="email-in" type="email" autoCapitalize="off" autoCorrect="off" name="MERGE0" id="MERGE0"
                                size="25" placeholder="Enter your email address"/>
                     </div>
-                    <input type="submit" class="form-submit" name="submit" value="Subscribe"/>
+                    <button type="submit" class="form-submit" name="submit">Subscribe</button>
                 </form>
             </div>
         </div>
-    </section>
-
-
-    <!--Footer-->
-    <section id="footer">
-        <div id="left-footer">
+        <div id="footer-links">
+            <div id="footer-links1" class="right-footer">
+                <p class="footer-text"><a class ='link' href="about.html" target="_blank">About</a></p>
+                <p class="footer-text"><a class ='link' href="mailto:contact@mousaineuro.com" target="_blank">Contact</a></p>
+            </div>
+            <div id="footer-links2" class="right-footer">
+                <p class="footer-text"><a class ='link' href="contribute.html" target="_blank">Contribute</a></p>
+                <p class ='footer-text'><a class ='link' href="rules.html">Rules</a></p>
+            </div>
+            <div id="footer-links3" class="right-footer">
+                <p class ='footer-text'><a class ='link' href="terms.html">Terms</a></p>
+                <p class ='footer-text'><a class ='link' href="privacy.html">Privacy</a></p>
+            </div>
+        </div>
+        <div class="center-footer">
             <div class="social">
                 <a href='https://twitter.com/mousaineuro' label='Twitter'>
                     <svg viewBox="0 0 24 24">
@@ -85,21 +100,13 @@
                         <path d = "M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
                     </svg>
                 </a>
-                <a href='https://dribbble.com/mousaineuro' label='Twitter'>
-                    <svg viewBox="0 0 24 24">
-                        <path d = "M12 0c-6.628 0-12 5.373-12 12s5.372 12 12 12 12-5.373 12-12-5.372-12-12-12zm9.885 11.441c-2.575-.422-4.943-.445-7.103-.073-.244-.563-.497-1.125-.767-1.68 2.31-1 4.165-2.358 5.548-4.082 1.35 1.594 2.197 3.619 2.322 5.835zm-3.842-7.282c-1.205 1.554-2.868 2.783-4.986 3.68-1.016-1.861-2.178-3.676-3.488-5.438.779-.197 1.591-.314 2.431-.314 2.275 0 4.368.779 6.043 2.072zm-10.516-.993c1.331 1.742 2.511 3.538 3.537 5.381-2.43.715-5.331 1.082-8.684 1.105.692-2.835 2.601-5.193 5.147-6.486zm-5.44 8.834l.013-.256c3.849-.005 7.169-.448 9.95-1.322.233.475.456.952.67 1.432-3.38 1.057-6.165 3.222-8.337 6.48-1.432-1.719-2.296-3.927-2.296-6.334zm3.829 7.81c1.969-3.088 4.482-5.098 7.598-6.027.928 2.42 1.609 4.91 2.043 7.46-3.349 1.291-6.953.666-9.641-1.433zm11.586.43c-.438-2.353-1.08-4.653-1.92-6.897 1.876-.265 3.94-.196 6.199.196-.437 2.786-2.028 5.192-4.279 6.701z" />
-                    </svg>
-                </a>
+<!--                <a href='https://dribbble.com/mousaineuro' label='Twitter'>-->
+<!--                    <svg viewBox="0 0 24 24">-->
+<!--                        <path d = "M12 0c-6.628 0-12 5.373-12 12s5.372 12 12 12 12-5.373 12-12-5.372-12-12-12zm9.885 11.441c-2.575-.422-4.943-.445-7.103-.073-.244-.563-.497-1.125-.767-1.68 2.31-1 4.165-2.358 5.548-4.082 1.35 1.594 2.197 3.619 2.322 5.835zm-3.842-7.282c-1.205 1.554-2.868 2.783-4.986 3.68-1.016-1.861-2.178-3.676-3.488-5.438.779-.197 1.591-.314 2.431-.314 2.275 0 4.368.779 6.043 2.072zm-10.516-.993c1.331 1.742 2.511 3.538 3.537 5.381-2.43.715-5.331 1.082-8.684 1.105.692-2.835 2.601-5.193 5.147-6.486zm-5.44 8.834l.013-.256c3.849-.005 7.169-.448 9.95-1.322.233.475.456.952.67 1.432-3.38 1.057-6.165 3.222-8.337 6.48-1.432-1.719-2.296-3.927-2.296-6.334zm3.829 7.81c1.969-3.088 4.482-5.098 7.598-6.027.928 2.42 1.609 4.91 2.043 7.46-3.349 1.291-6.953.666-9.641-1.433zm11.586.43c-.438-2.353-1.08-4.653-1.92-6.897 1.876-.265 3.94-.196 6.199.196-.437 2.786-2.028 5.192-4.279 6.701z" />-->
+<!--                    </svg>-->
+<!--                </a>-->
             </div>
             <p class="footer-text center unavailable">© 2020 Mousai Neurotechnologies</p>
-        </div>
-        <div id="right-footer">
-            <p class="footer-text"><a class ='link' href="about.html" target="_blank">About Mousai</a></p>
-            <p class="footer-text"><a class ='link' href="contribute.html" target="_blank">Contribute</a></p>
-            <p class="footer-text"><a class ='link' href="mailto:contact@mousaineuro.com" target="_blank">Contact</a></p>
-            <p class ='footer-text'><a class ='link' href="rules.html">Rules</a></p>
-            <p class ='footer-text'><a class ='link' href="terms.html">Terms</a></p>
-            <p class ='footer-text'><a class ='link' href="privacy.html">Privacy</a></p>
         </div>
     </section>
 
