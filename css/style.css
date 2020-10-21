@@ -624,6 +624,13 @@ input:focus{
     align-items: center;
 }
 
+.fullscreen{
+    display: flex;
+    height:calc(100vh - 150px);
+    justify-content: center;
+    align-items: center;
+}
+
 /* App Nav */
 
 #app-menu {
