@@ -10,7 +10,7 @@ async function particleBrain() {
     let vertexHome;
     let vertexCurr;
     let temp;
-    let shape_array = ['brain',shapes.sphereShell,shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
+    let shape_array = ['brain', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
 
 
     if (!gl) {
@@ -20,13 +20,17 @@ async function particleBrain() {
     let desired_resolution = 1e5;
     let resolution;
     let shape = 0;
-    let key_events = [37,38,39,40];
+    let key_events = [37, 38, 39, 40];
     let damping = .2;
 
 
-    temp = await createPointCloud('brain'); // or shapes.[shape]
-    const brainVertices = await reducePointCount(temp,desired_resolution)
-    resolution = brainVertices.length/3;
+    if (typeof brainVertices === 'undefined') {
+        temp = await createPointCloud('brain'); // or shapes.[shape]
+        brainVertices = await reducePointCount(temp, desired_resolution)
+}
+
+resolution = brainVertices.length / 3;
+
 
     // Generate Point Clouds (defined in point-functions.js)
     if (shape_array[shape] != 'brain') {
