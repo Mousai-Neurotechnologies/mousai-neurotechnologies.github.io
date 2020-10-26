@@ -888,6 +888,20 @@ button i {
 }
 
 
+/* WebGL Canvas */
+#container {
+    position: relative;
+}
+
+#container canvas, #overlay {
+    position: absolute;
+}
+canvas {
+    width: 100vw;
+    height: 100vh;
+}
+
+
 /* Chat */
 
 #chat {width: 300px; background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
