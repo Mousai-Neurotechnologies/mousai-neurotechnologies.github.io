@@ -17,19 +17,22 @@ async function particleBrain() {
         throw new Error('WebGL not supported')
     }
 
-    let desired_resolution = 1e5;
-    let resolution;
     let shape = 0;
     let key_events = [37, 38, 39, 40];
     let damping = .2;
+    let z_off = 2;
 
 
     if (typeof brainVertices === 'undefined') {
         temp = await createPointCloud('brain'); // or shapes.[shape]
         brainVertices = await reducePointCount(temp, desired_resolution)
-}
+        // meanX = every_nth(brainVertices,0, 3).reduce(sum, 0)/(brainVertices.length/3)
+        // meanY = every_nth(brainVertices,1, 3).reduce(sum, 0)/(brainVertices.length/3)
+        // meanZ = every_nth(brainVertices,2, 3).reduce(sum, 0)/(brainVertices.length/3)
 
-resolution = brainVertices.length / 3;
+        resolution = brainVertices.length / 3;
+
+    }
 
 
     // Generate Point Clouds (defined in point-functions.js)
@@ -218,7 +221,7 @@ void main() {
     // mat4.rotateY(modelMatrix, modelMatrix, -Math.PI / 2);
     mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
     mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
-    mat4.translate(viewMatrix, viewMatrix, [0, 0, 2]);
+    mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
     mat4.invert(viewMatrix, viewMatrix);
 
 
@@ -316,8 +319,13 @@ void main() {
         }
 
         gl.drawArrays(gl.POINTS, 0, vertexCurr.length / 3);
-        mat4.rotateY(modelMatrix, modelMatrix, diff_y*2*Math.PI/canvas.height);
-        mat4.rotateZ(modelMatrix, modelMatrix, diff_x*2*Math.PI/canvas.width);
+        mat4.invert(viewMatrix, viewMatrix);
+        mat4.translate(viewMatrix, viewMatrix, [0, 0, -z_off]);
+        mat4.rotateY(viewMatrix, viewMatrix, diff_x*2*Math.PI/canvas.height);
+        mat4.rotateX(viewMatrix, viewMatrix, diff_y*2*Math.PI/canvas.width);
+        mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+        mat4.invert(viewMatrix, viewMatrix);
+        // mat4.rotateZ(viewMatrix, viewMatrix, -0.01);
         mat4.multiply(mvMatrix, viewMatrix, modelMatrix)
         mat4.multiply(mvpMatrix, projectionMatrix, mvMatrix)
         gl.uniformMatrix4fv(uniformLocations.matrix, false, mvpMatrix)

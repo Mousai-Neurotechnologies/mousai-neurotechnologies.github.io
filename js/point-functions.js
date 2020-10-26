@@ -1,3 +1,9 @@
+const every_nth = (arr, offset, nth) => arr.filter((e, i) => (i+offset) % nth === nth - 1);
+
+function sum(a,b){
+    return a + b
+}
+
 function reducePointCount(pointCloud,desiredCount){
     let slice;
     let output = [];
