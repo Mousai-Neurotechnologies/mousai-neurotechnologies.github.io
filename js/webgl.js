@@ -17,14 +17,16 @@ async function particleBrain() {
         throw new Error('WebGL not supported')
     }
 
-    let resolution = 1e5;
+    let desired_resolution = 1e5;
+    let resolution;
     let shape = 0;
     let key_events = [37,38,39,40];
     let damping = .2;
 
 
-    const brainVertices = await createPointCloud('brain'); // or shapes.[shape]
-    // const brainVertices = await reducePointCount(temp,resolution)
+    temp = await createPointCloud('brain'); // or shapes.[shape]
+    const brainVertices = await reducePointCount(temp,desired_resolution)
+    resolution = brainVertices.length/3;
 
     // Generate Point Clouds (defined in point-functions.js)
     if (shape_array[shape] != 'brain') {
@@ -231,7 +233,7 @@ void main() {
     let diff = [];
     let timeFlag = false;
     let tIter = 1;
-    let ease;
+    let ease = true;
 
     canvas.onmousedown = function(ev){
         holdStatus = true;
@@ -273,17 +275,11 @@ void main() {
                     else if (ev.keyCode == '37' && shape > 0) {
                         shape -= 1
                     }
-                if (shape_array[shape] != 'brain') {
-                    vertexCurr = vertexCurr.slice(0, resolution)
-                    vertexHome = createPointCloud(shape_array[shape], resolution); //.1e5); // or shapes.[shape]
-                    ease = true;
-                } else {
-                    vertexCurr = [...brainVertices];
-                    vertexHome = brainVertices;
-                    ease = false;
-                    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexCurr), gl.DYNAMIC_DRAW);
-
-                }
+                    if (shape_array[shape] != 'brain'){
+                        vertexHome = createPointCloud(shape_array[shape], resolution);
+                    } else {
+                        vertexHome = [...brainVertices];
+                    }
             }
         }
     };
