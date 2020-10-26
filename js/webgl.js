@@ -167,7 +167,7 @@ precision mediump float;
 varying vec3 vColor;
 
 void main() {
-    gl_FragColor = vec4(vColor,1.0);
+    gl_FragColor = vec4(vColor,0.5);
 }
 `);
     gl.compileShader(fragmentShader);
@@ -195,6 +195,8 @@ void main() {
 // draw
     gl.useProgram(program);
     gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND)
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 // matrix code
     const uniformLocations = {
