@@ -23,8 +23,8 @@ async function particleBrain() {
     let damping = .2;
 
 
-    temp = await createPointCloud('brain'); // or shapes.[shape]
-    const brainVertices = await reducePointCount(temp,resolution)
+    const brainVertices = await createPointCloud('brain'); // or shapes.[shape]
+    // const brainVertices = await reducePointCount(temp,resolution)
 
     // Generate Point Clouds (defined in point-functions.js)
     if (shape_array[shape] != 'brain') {
@@ -231,6 +231,7 @@ void main() {
     let diff = [];
     let timeFlag = false;
     let tIter = 1;
+    let ease;
 
     canvas.onmousedown = function(ev){
         holdStatus = true;
@@ -264,23 +265,25 @@ void main() {
                 tIter = 1;
             } else if (ev.keyCode == '40') {
                 tIter =+ damping*(-t);
-            } else if (ev.keyCode == '37') {
-                if (shape > 0) {
-                    shape -= 1
-                    if (shape_array[shape] != 'brain') {
-                        vertexHome = createPointCloud(shape_array[shape], resolution); //.1e5); // or shapes.[shape]
-                    } else {
-                        vertexHome = brainVertices;
+            } else if (ev.keyCode == '39' || ev.keyCode == '37') {
+                    if (ev.keyCode == '39' && shape < 4)
+                    {
+                        shape += 1
                     }
+                    else if (ev.keyCode == '37' && shape > 0) {
+                        shape -= 1
+                    }
+                if (shape_array[shape] != 'brain') {
+                    vertexCurr = vertexCurr.slice(0, resolution)
+                    vertexHome = createPointCloud(shape_array[shape], resolution); //.1e5); // or shapes.[shape]
+                    ease = true;
+                } else {
+                    vertexCurr = [...brainVertices];
+                    vertexHome = brainVertices;
+                    ease = false;
+                    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexCurr), gl.DYNAMIC_DRAW);
+
                 }
-            } else if (ev.keyCode == '39') {
-                if (shape < 4) {
-                    shape += 1
-                    if (shape_array[shape] != 'brain') {
-                        vertexHome = createPointCloud(shape_array[shape], resolution); //.1e5); // or shapes.[shape]
-                    } else {
-                        vertexHome = brainVertices;
-                    }                }
             }
         }
     };
@@ -300,7 +303,7 @@ void main() {
         mouseState()
 
         // Ease points around
-        if (vertexHome != vertexCurr){
+        if (ease){
             for (let ind in vertexHome){
                 diff = vertexHome[ind] - vertexCurr[ind]
                 if (diff <= Math.abs(.01)){
@@ -310,7 +313,7 @@ void main() {
                 }
             }
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexCurr), gl.DYNAMIC_DRAW);
-            console.log('always animating...')
+            console.log('updating point positions...')
         }
 
         gl.drawArrays(gl.POINTS, 0, vertexCurr.length / 3);

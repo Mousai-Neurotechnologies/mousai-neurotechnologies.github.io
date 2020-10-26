@@ -2,14 +2,12 @@ function reducePointCount(pointCloud,desiredCount){
     let slice;
     let output = [];
     for (let ind = 0; ind < (pointCloud.length/3); ind+=Math.floor((pointCloud.length/3)/desiredCount)){
-        slice = pointCloud.slice(ind, ind+3)
+        slice = pointCloud.slice(ind+1, ind+4)
         output.push(...slice)
     }
     output = output.slice(0,desiredCount*3)
     return output
 }
-
-
 
 function createPointCloud(pointFunction, pointCount) {
     let pointCloud = [];
