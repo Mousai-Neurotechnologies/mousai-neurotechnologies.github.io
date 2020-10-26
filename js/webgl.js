@@ -263,7 +263,12 @@ void main() {
 
     canvas.onwheel = function(ev){
         scroll = ev.deltaY;
-        mat4.translate(viewMatrix, viewMatrix, [scroll/100,0,0]);
+        mat4.invert(viewMatrix, viewMatrix);
+        mat4.translate(viewMatrix, viewMatrix, [0, 0, -z_off]);
+        mat4.translate(viewMatrix, viewMatrix, [0,0,scroll/100]);
+        mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+        mat4.invert(viewMatrix, viewMatrix);
+        z_off += scroll/100;
     };
 
     document.onkeydown = function(ev){
