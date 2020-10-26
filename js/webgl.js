@@ -313,7 +313,6 @@ void main() {
                 }
             }
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexCurr), gl.DYNAMIC_DRAW);
-            console.log('updating point positions...')
         }
 
         gl.drawArrays(gl.POINTS, 0, vertexCurr.length / 3);
