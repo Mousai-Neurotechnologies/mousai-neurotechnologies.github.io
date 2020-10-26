@@ -3,9 +3,9 @@
 // Unported License. The original work can be found at
 // https://brainder.org/brain-for-blender.
 
-async function main() {
+async function particleBrain() {
 
-    const canvas = document.querySelector('canvas')
+    const canvas = document.getElementById('webgl')
     const gl = canvas.getContext('webgl')
     let vertexHome;
     let vertexCurr;
@@ -197,7 +197,7 @@ void main() {
 
     const modelMatrix = mat4.create();
     const viewMatrix = mat4.create();
-    const projectionMatrix = mat4.create();
+    let projectionMatrix = mat4.create();
     mat4.perspective(projectionMatrix,
         75 * Math.PI / 180, // vertical field-of-view (angle, radians)
         canvas.width / canvas.height, // aspect W/H
@@ -335,5 +335,3 @@ void main() {
     };
     animate()
 }
-
-main();

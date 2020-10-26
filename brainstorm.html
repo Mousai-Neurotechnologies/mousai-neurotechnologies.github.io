@@ -7,10 +7,11 @@
     <link rel=icon href=assets/favicon.ico>
     <link rel="stylesheet" type="text/css" href="css/style.css"/>
 <!--    <script src="https://d3js.org/d3.v6.min.js"></script>-->
-    <script type="text/javascript" src="js/brainstorm.js"></script>
-    <script src="js/gl-matrix-min.js" defer></script>
-    <script src="js/point-functions.js" defer></script>
-    <script src="js/shader.js" defer></script>
+    <script type="text/javascript" src="js/webgl.js" defer></script>
+    <script type="text/javascript" src="js/visualizations.js"></script>
+    <script type="text/javascript" src="js/utils.js" defer></script>
+    <script type="text/javascript" src="js/gl-matrix-min.js" defer></script>
+    <script type="text/javascript" src="js/point-functions.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.min.js" integrity="sha512-/WwtKR6NnHomLo0O4w9QKc1INTPEJs7ko6u2aBTA1paPldhPl8LtXsi7a35iEZ69+9P5dcgVNESG8hrP4Y2t3w==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bcijs@1.8.0/dist/bci.min.js"></script>
@@ -60,9 +61,7 @@
     </div>
 
 <div id="brainstorm">
-<div id="container">
-    <canvas></canvas>
-    <!--    <div id="p5Canvas"></div>-->
+<div id="canvas-container">
 </div>
 <div id="tutorial">
     <div id="tutorial-text">
@@ -89,7 +88,7 @@
             </button>
         </div>
         <div>
-            <button id="auto-generate" onclick="generateSignal()">
+            <button id="auto-generate" onclick=" generate = generateSignal(generate,channels)">
                 <i class="fas fa-play-circle fa-2x"></i>
                 <p>Autoplay Signal</p>
             </button>
@@ -110,67 +109,40 @@
         </div>
     </div>
 </div>
+    <div id="visualization-options">
+        <button onclick="chooseVis('WebGL');">
+            Particle Cloud (WebGL)
+        </button>
+        <button onclick="chooseVis('P5')">
+            Voltage Stream (P5)
+        </button>
+    </div>
 </div>
 </div>
 
 <script>
 
-    const _c = document.getElementsByTagName('canvas')[0];
-    _c.width = window.innerWidth;
-    _c.height = window.innerHeight;
-
+    // Initialize Variables and Controls
     let channels = 1;
     let new_chan = 1;
-
-    const selectElement = document.getElementById('channels');
-
-    selectElement.addEventListener('change', (event) => {
-        new_chan = parseFloat(event.target.value);
-        console.log(new_chan)
-        if (new_chan < channels) {
-            for (let chan = new_chan; chan < channels; chan++){
-                yvalues[chan] = [];
-                other_yvalues[chan] = [];
-            }
-        } else {
-            yvalues = [];
-            other_yvalues = [];
-            yvalues = new Array(new_chan);
-            other_yvalues = new Array(new_chan);
-
-            for (let chan = 0; chan < new_chan; chan++) {
-                yvalues[chan] = new Array(200).fill(0);
-                other_yvalues[chan] = new Array(200).fill(0);
-            }
-        }
-        channels = new_chan;
-    });
-
+    let generate = false;
     let duration = 1 // seconds
-
     let samplerate = 125; // This is almost definitely wrong
     let generate_interval = Math.round(duration*samplerate); // seconds
     let count = 0;
-
     let max_dy = 50;
-
-    let generate = false;
-
     let yvalues = new Array(channels);
     let other_yvalues = new Array(channels);
-
     for (let chan = 0; chan < channels; chan++){
         yvalues[chan] = new Array(200).fill(0);
         other_yvalues[chan] = new Array(200).fill(0);
     }
-
-
     let basetime = new Array(200).fill(Date.now());
     let other_basetime = new Array(200).fill(Date.now());
-
     let signal = [];
+    let passed_signal = []
+    let passed_time = []
 
-    // let filterOrder = 128;
 
     let messages = []
     let  url = 'https://brainsatplay.azurewebsites.net/'
@@ -197,292 +169,10 @@
             $('#messages').append($('<li>').text(msg));
         });
 
-        let passed_signal = []
-        let passed_time = []
-
         socket.on('bci', passSignal);
 
-        function passSignal(data) {
-            passed_signal = data.signal
-            passed_time = data.time
-            console.log('Signal passed')
-        }
-        //
-        // new p5(function (p5) {
-        //     // let start_time = Date.now();
-        //     let first_sig = true;
-        //     let in_min
-        //     let in_max
-        //     let out_min
-        //     let out_max
-        //     let t_inner
-        //     let y1
-        //     let basetime_package
-        //     let signal_package
-        //     let time_package
-        //     let y_package
-        //     let label_package = ['me', 'other'];
-        //     let color_package = [p5.color('#7373FF'), p5.color('#76BEFF')]
-        //     let band_color = [p5.color('#7373FF'), p5.color('#76BEFF')];
-        //     let this_band_color;
-        //     let synchrony;
-        //     let sync_color = p5.color('#76BEFF')
-        //     let antisync_color = p5.color('#FF76E9')
-        //     let canvas;
-        //
-        //     let bandpowers;
-        //
-        //
-        //     p5.setup = () => {
-        //         canvas = p5.createCanvas(p5.windowWidth, p5.windowHeight);
-        //         canvas.parent("p5Canvas");
-        //     }
-        //
-        //     p5.windowResized = () => {
-        //         p5.resizeCanvas(p5.windowWidth, p5.windowHeight);
-        //     }
-        //
-        //     p5.draw = () => {
-        //         p5.background(0);
-        //         p5.translate(0, p5.height / 2);
-        //         signal_package = [signal, passed_signal];
-        //         time_package = [passed_time, passed_time];
-        //         y_package = [yvalues, other_yvalues];
-        //         basetime_package = [basetime, other_basetime]
-        //
-        //         // Only correlation of first channels
-        //         synchrony = getPearsonCorrelation(yvalues[0], other_yvalues[0])
-        //
-        //         // if (count == 1) {
-        //         //     samplerate = p5.frameRate(); // This is almost definitely wrong
-        //         //     console.log(samplerate)
-        //         // }
-        //
-        //         // generate_interval = Math.round(duration*samplerate); // seconds
-        //         if (generate) {
-        //         if (count == generate_interval){
-        //             sendSignal(channels)
-        //             count = 0;
-        //         } else {
-        //             count += 1
-        //         }}
-        //
-        //         processSignal(signal_package, time_package, y_package, basetime_package, label_package, color_package)
-        //     }
-        //
-        //     function calcWave(sig, t, yvals, bt) {
-        //         bt.shift();
-        //         bt.push(Date.now())
-        //
-        //         for (let chan in sig){
-        //             yvals[chan].shift();
-        //             if (sig[chan].length > 0) {
-        //                 if (first_sig) {
-        //                     // start_time = Date.now();
-        //                     first_sig = false;
-        //                 }
-        //                 yvals[chan].push(sig[chan].shift())
-        //             } else {
-        //                 yvals[chan].push(0)
-        //             }
-        //         }
-        //
-        //         return sig, t, yvals, bt
-        //     }
-        //
-        //     function renderWave(yvals, bt, usr, c) {
-        //         // A simple way to draw the wave with an ellipse at each location
-        //         // c.setAlpha(100)
-        //
-        //         // Filter
-        //         let y_filtered = yvals //filterSignal(yvals)
-        //         let offset;
-        //         let margin = 100;
-        //         max_dy = (p5.height - 2*margin) / channels;
-        //         let dy = 200;
-        //
-        //         // Map to Window Size
-        //         p5.stroke(c);
-        //         p5.strokeWeight(2);
-        //         in_min = Math.min(...bt);
-        //         in_max = Math.max(...bt);
-        //         out_min = 0;
-        //         out_max = p5.width;
-        //         t_inner = bt.map(x => (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
-        //
-        //         if (dy > max_dy){dy = max_dy;}
-        //
-        //         for (let chan in y_filtered) {
-        //             p5.push()
-        //             p5.scale(1, -1);
-        //             y1 = y_filtered[chan]
-        //             offset = dy*((channels-1)/2) - ((chan * dy));
-        //             // offset = (p5.height / 2 - margin) - (chan * (p5.height - 2*margin) / channels) + channels/2;
-        //             for (let ind = 0; ind < y_filtered[chan].length - 1; ind++) {
-        //                 p5.line(t_inner[ind], y1[ind] + offset, t_inner[ind + 1], y1[ind + 1] + offset);
-        //             }
-        //             p5.pop()
-        //         }
-        //
-        //
-        //         // Plot Bands
-        //         let power;
-        //         let label;
-        //         let band_names = ['delta', 'theta', 'alpha', 'beta', 'gamma']
-        //         let band_meaning = ['(1-3 Hz)','(4-7 Hz)','(8-12 Hz)','(13-30 Hz)','(31-50 Hz)']
-        //
-        //         p5.noStroke()
-        //         let squareColor = p5.color(255, 255, 255);
-        //         p5.textAlign(p5.CENTER, p5.BOTTOM);
-        //         if (usr == 'me') {
-        //             this_band_color = band_color[0]
-        //         } else {
-        //             this_band_color = band_color[1]
-        //         }
-        //
-        //         for (let band = 0; band < band_names.length; band++) {
-        //             try {
-        //                 power = bci.bandpower(y_filtered[0], samplerate, band_names[band], {relative: true});
-        //                 label = band_names[band] + ' ' + band_meaning[band]
-        //             } catch {
-        //                 label = 'sample rate too low'
-        //                 this_band_color = p5.color('#FF76E9');
-        //                 power = 1
-        //             }
-        //                 power = (p5.height / 2) - (p5.height / 4) * (power)
-        //                 squareColor.setAlpha(255 * (power));
-        //                 p5.fill(squareColor)
-        //                 p5.text(label, (band + .5) * (p5.width / band_names.length), power - 20);
-        //                 this_band_color.setAlpha(200 * (power));
-        //                 p5.fill(this_band_color)
-        //                 p5.rectMode(p5.CORNERS);
-        //                 p5.rect(band * (p5.width / (band_names.length)), p5.height / 2, (band + 1) * (p5.width / (band_names.length)), power)
-        //             }
-        //
-        //         // Plot Synchrony
-        //         if (usr == 'me') {
-        //             // squareColor.setAlpha(255);
-        //             // p5.fill(squareColor)
-        //             if (synchrony != 1 && !isNaN(synchrony)) {
-        //                 if (synchrony > 0) {
-        //                     document.getElementById('sync-dot').style.backgroundColor = sync_color;
-        //                 } else {
-        //                     document.getElementById('sync-dot').style.backgroundColor = antisync_color;
-        //                 }
-        //
-        //                 document.getElementById('sync-dot').style.width = (synchrony * 50).toString() + 'px';
-        //                 document.getElementById('sync-dot').style.height = (synchrony * 50).toString() + 'px';
-        //                 // p5.ellipse(2*p5.width / 3, -p5.height / 4, synchrony * 50, synchrony * 50);
-        //             } else{
-        //                 document.getElementById('sync-dot').style.height = '0px';
-        //                 document.getElementById('sync-dot').style.width = '0px';
-        //
-        //             }
-        //         }
-        //     }
-        //
-        //     function processSignal(sig, t, yvals, bt, usr, col) {
-        //         for (let ind in sig) {
-        //             sig[ind], t[ind], yvals[ind], bt[ind] = calcWave(sig[ind], t[ind], yvals[ind], bt[ind]);
-        //             renderWave(yvals[ind], bt[ind], usr[ind], col[ind]);
-        //         }
-        //         return sig, t, yvals, bt
-        //     }
-        // })
+        chooseVis('WebGL');
     }
-
-        /*
-        *  Source: http://stevegardner.net/2012/06/11/javascript-code-to-calculate-the-pearson-correlation-coefficient/
-        */
-        function getPearsonCorrelation(x, y) {
-            var shortestArrayLength = 0;
-
-            if (x.length == y.length) {
-                shortestArrayLength = x.length;
-            } else if (x.length > y.length) {
-                shortestArrayLength = y.length;
-                console.error('x has more items in it, the last ' + (x.length - shortestArrayLength) + ' item(s) will be ignored');
-            } else {
-                shortestArrayLength = x.length;
-                console.error('y has more items in it, the last ' + (y.length - shortestArrayLength) + ' item(s) will be ignored');
-            }
-
-            var xy = [];
-            var x2 = [];
-            var y2 = [];
-
-            for (var i = 0; i < shortestArrayLength; i++) {
-                xy.push(x[i] * y[i]);
-                x2.push(x[i] * x[i]);
-                y2.push(y[i] * y[i]);
-            }
-
-            var sum_x = 0;
-            var sum_y = 0;
-            var sum_xy = 0;
-            var sum_x2 = 0;
-            var sum_y2 = 0;
-
-            for (var i = 0; i < shortestArrayLength; i++) {
-                sum_x += x[i];
-                sum_y += y[i];
-                sum_xy += xy[i];
-                sum_x2 += x2[i];
-                sum_y2 += y2[i];
-            }
-
-            var step1 = (shortestArrayLength * sum_xy) - (sum_x * sum_y);
-            var step2 = (shortestArrayLength * sum_x2) - (sum_x * sum_x);
-            var step3 = (shortestArrayLength * sum_y2) - (sum_y * sum_y);
-            var step4 = Math.sqrt(step2 * step3);
-            var answer = step1 / step4;
-
-            return answer;
-        }
-
-    // Two Way Data Binding
-    var elements = document.querySelectorAll('[data-tw-bind]'),
-    scope = {};
-    elements.forEach(function(element) {
-        //execute scope setter
-        if(element.type === 'text'|| element.type === 'textarea' || element.type === 'range'){
-            var propToBind = element.getAttribute('data-tw-bind');
-            addScopeProp(propToBind);
-            element.oninput = function(){
-                scope[propToBind] = element.value;
-            }
-
-            //bind prop to elements
-            function addScopeProp(prop){
-                //add property if needed
-                if(!scope.hasOwnProperty(prop)){
-                    //value to populate with newvalue
-                    var value;
-                    Object.defineProperty(scope, prop, {
-                        set: function (newValue) {
-                            value = newValue;
-                            elements.forEach(function(element){
-                                //change value to binded elements
-                                if(element.getAttribute('data-tw-bind') === prop){
-                                    if(element.type && (element.type === 'text' ||
-                                        element.type === 'textarea'||
-                                        element.type === 'range')){
-                                        element.value = newValue;
-                                    }
-                                    else if(!element.type){
-                                        element.innerHTML = newValue;
-                                    }
-                                }
-                            });
-                        },
-                        get: function(){
-                            return value;
-                        },
-                        enumerable: true
-                    });
-                }
-            }
-        }});
 </script>
 
 </body>

@@ -889,17 +889,36 @@ button i {
 
 
 /* WebGL Canvas */
-#container {
+#visualization-options{
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 100px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    pointer-events: none;
+}
+
+#visualization-options button{
+    pointer-events: auto;
+}
+
+#canvas-container {
     position: relative;
 }
 
-#container canvas, #overlay {
-    position: absolute;
-}
-canvas {
-    width: 100vw;
-    height: 100vh;
-}
+/*!*#canvas-container canvas, #overlay {*!*/
+/*!*    position: absolute;*!*/
+/*!*}*!*/
+
+/*canvas {*/
+/*    position: absolute;*/
+/*    width: 100vw;*/
+/*    height: 100vh;*/
+/*}*/
 
 
 /* Chat */
