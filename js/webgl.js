@@ -10,7 +10,10 @@ async function particleBrain() {
     let vertexHome;
     let vertexCurr;
     let temp;
+    // let shape_array = ['brain', 'brain', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
+    // let render_array = [gl.TRIANGLES, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
     let shape_array = ['brain', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
+    let render_array = [gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
 
 
     if (!gl) {
@@ -26,6 +29,7 @@ async function particleBrain() {
     if (typeof brainVertices === 'undefined') {
         temp = await createPointCloud('brain'); // or shapes.[shape]
         brainVertices = await reducePointCount(temp, desired_resolution)
+        brainMesh = await convertToMesh(brainVertices)
         // meanX = every_nth(brainVertices,0, 3).reduce(sum, 0)/(brainVertices.length/3)
         // meanY = every_nth(brainVertices,1, 3).reduce(sum, 0)/(brainVertices.length/3)
         // meanZ = every_nth(brainVertices,2, 3).reduce(sum, 0)/(brainVertices.length/3)
@@ -291,8 +295,15 @@ void main() {
                     }
                     if (shape_array[shape] != 'brain'){
                         vertexHome = createPointCloud(shape_array[shape], resolution);
+                        ease = true;
                     } else {
-                        vertexHome = [...brainVertices];
+                        if (render_array[shape] == gl.POINTS) {
+                            vertexHome = [...brainVertices];
+                            ease = true;
+                        } else{
+                            vertexHome = [...brainMesh];
+                            ease = false;
+                        }
                     }
             }
         }
@@ -325,7 +336,7 @@ void main() {
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexCurr), gl.DYNAMIC_DRAW);
         }
 
-        gl.drawArrays(gl.POINTS, 0, vertexCurr.length / 3);
+        gl.drawArrays(render_array[shape], 0, vertexCurr.length / 3);
         mat4.invert(viewMatrix, viewMatrix);
         mat4.translate(viewMatrix, viewMatrix, [0, 0, -z_off]);
         mat4.rotateY(viewMatrix, viewMatrix, diff_x*2*Math.PI/canvas.height);

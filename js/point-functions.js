@@ -4,6 +4,16 @@ function sum(a,b){
     return a + b
 }
 
+function convertToMesh(pointCloud){
+    let slice;
+    let output = [];
+    for (let ind = 0; ind < (pointCloud.length/3); ind++){
+        slice = pointCloud.slice(ind, ind+9)
+        output.push(...slice)
+    }
+    return output
+}
+
 function reducePointCount(pointCloud,desiredCount){
     let slice;
     let output = [];
