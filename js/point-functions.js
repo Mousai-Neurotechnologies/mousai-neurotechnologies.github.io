@@ -27,14 +27,18 @@ function reducePointCount(pointCloud,desiredCount){
 function createPointCloud(pointFunction, pointCount) {
     let pointCloud = [];
 
-    if (pointFunction != 'brain') {
-        for (let i = 0; i < pointCount; i++) {
+    if (pointFunction == 'brain') {
+        pointCloud = getBrain()
+    } else if (pointFunction == 'voltage') {
+        [pointCloud, ] = getVoltages(pointCloud,pointCount)
+        console.log(pointCloud)
+    }
+    else{
+            for (let i = 0; i < pointCount; i++) {
             const r = () => Math.random() - 0.5;
             const point = pointFunction(r(), r(), r());
             pointCloud.push(...point);
         }
-    } else{
-        pointCloud = getBrain()
     }
 
     return pointCloud;
@@ -198,3 +202,25 @@ async function getBrain() {
 
     return vertices
 }
+
+
+function getVoltages(pointCloud, pointCount) {
+    let channel_inds = [0];
+    let height = 2;
+    let shift_trigger = Math.floor(pointCount/(channels));
+    let factor = (pointCount/(2*channels))
+    let z = -(height/2);
+    let y = -factor/2;
+    for (let i = 0; i < pointCount; i++) {
+        if (i%shift_trigger == 0){
+            channel_inds.push(i*3)
+            z += height/(channels);
+            y = -factor/2;
+        }
+        const point = [0, (y - factor/2)/(factor/2),z];
+        pointCloud.push(...point);
+        y += 1
+    }
+    return pointCloud
+}
+

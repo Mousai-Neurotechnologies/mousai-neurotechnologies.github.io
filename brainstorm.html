@@ -125,11 +125,9 @@
     // Initialize Brain
     let brainVertices;
     let brainMesh;
-    let desired_resolution = 80000;
+    let desired_resolution = 1e4; // 80000
     let resolution;
-    let meanX;
-    let meanY;
-    let meanZ;
+    let channel_start_indices = [0];
 
     // Initialize Variables and Controls
     let channels = 1;

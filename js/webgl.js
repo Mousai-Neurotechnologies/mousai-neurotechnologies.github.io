@@ -12,9 +12,58 @@ async function particleBrain() {
     let temp;
     // let shape_array = ['brain', 'brain', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
     // let render_array = [gl.TRIANGLES, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
-    let shape_array = ['brain', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
-    let render_array = [gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
+    let shape_array = ['brain', 'voltage', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
+    let render_array = [gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
 
+
+    // ------------------------------------- P5 Ported Controls ------------------------------------ //
+    // Initialize Controls
+    const selectElement = document.getElementById('channels');
+
+    selectElement.addEventListener('change', (event) => {
+        new_chan = parseFloat(event.target.value);
+        [vertexHome, channel_start_indices] = getVoltages([],resolution);
+
+        // console.log(new_chan)
+        // if (new_chan < channels) {
+        //     for (let chan = new_chan; chan < channels; chan++){
+        //
+        //         yvalues[chan] = [];
+        //         // other_yvalues[chan] = [];
+        //     }
+        // } else {
+        //     yvalues = [];
+        //     // other_yvalues = [];
+        //     yvalues = new Array(new_chan);
+        //     // other_yvalues = new Array(new_chan);
+        //
+        //     for (let chan = 0; chan < new_chan; chan++) {
+        //         yvalues[chan] = new Array(200).fill(0);
+        //         // other_yvalues[chan] = new Array(200).fill(0);
+        //     }
+        // }
+        channels = new_chan;
+    });
+
+    // ------------------------------------- P5 Ported Variables ------------------------------------ //
+    let first_sig = true;
+    let in_min
+    let in_max
+    let out_min
+    let out_max
+    let t_inner
+    let y1
+    let basetime_package
+    let signal_package
+    let time_package
+    let y_package
+    let label_package = ['me', 'other'];
+    // let color_package = [p5.color('#7373FF'), p5.color('#76BEFF')]
+    // let band_color = [p5.color('#7373FF'), p5.color('#76BEFF')];
+    let this_band_color;
+    let synchrony;
+    // let sync_color = p5.color('#76BEFF')
+    // let antisync_color = p5.color('#FF76E9')
 
     if (!gl) {
         throw new Error('WebGL not supported')
@@ -38,13 +87,7 @@ async function particleBrain() {
 
     }
 
-
-    // Generate Point Clouds (defined in point-functions.js)
-    if (shape_array[shape] != 'brain') {
-        vertexHome =  await createPointCloud(shape_array[shape],resolution);
-    } else {
-        vertexHome = [...brainVertices];
-    }
+    vertexHome = [...brainVertices];
     vertexCurr = vertexHome;
 
 // createbuffer
@@ -293,10 +336,7 @@ void main() {
                     else if (ev.keyCode == '37' && shape > 0) {
                         shape -= 1
                     }
-                    if (shape_array[shape] != 'brain'){
-                        vertexHome = createPointCloud(shape_array[shape], resolution);
-                        ease = true;
-                    } else {
+                    if (shape_array[shape] == 'brain'){
                         if (render_array[shape] == gl.POINTS) {
                             vertexHome = [...brainVertices];
                             ease = true;
@@ -304,6 +344,13 @@ void main() {
                             vertexHome = [...brainMesh];
                             ease = false;
                         }
+                    } else if (shape_array[shape] == 'voltage'){
+                        vertexHome = createPointCloud(shape_array[shape], resolution);
+                        ease = true;
+                    }
+                    else {
+                        vertexHome = createPointCloud(shape_array[shape], resolution);
+                        ease = true;
                     }
             }
         }
@@ -322,6 +369,11 @@ void main() {
     function animate() {
         requestAnimationFrame(animate)
         mouseState()
+
+        // Append Voltage Stream
+        // if (shape_array[shape] == 'voltage') {
+        //     return
+        // }
 
         // Ease points around
         if (ease){
