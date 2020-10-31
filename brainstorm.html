@@ -109,14 +109,11 @@
         </div>
     </div>
 </div>
-    <div id="visualization-options">
-        <button onclick="chooseVis('WebGL');">
-            Particle Cloud (WebGL)
-        </button>
-        <button onclick="chooseVis('P5')">
-            Voltage Stream (P5)
-        </button>
-    </div>
+<!--    <div id="visualization-options">-->
+<!--        <button onclick="chooseVis('WebGL');">-->
+<!--            Particle Cloud (WebGL)-->
+<!--        </button>-->
+<!--    </div>-->
 </div>
 </div>
 
@@ -125,28 +122,45 @@
     // Initialize Brain
     let brainVertices;
     let brainMesh;
-    let desired_resolution = 1e4; // 80000
+    let desired_resolution = 1e5/2; // 80000
+    let reduce_point_display_factor = 100;
+    let inner_z = 2;
+    let signal_sustain;
     let resolution;
     let channel_start_indices = [0];
 
-    // Initialize Variables and Controls
+    let displacement = [];
+    let disp_flat = [];
+    let other_displacement = [];
+    let other_disp_flat = [];
+    let synchrony = 1;
+
+    // Initialize Variables and Controls (old variables from P5)
     let channels = 1;
     let new_chan = 1;
     let generate = false;
     let duration = 1 // seconds
-    let samplerate = 125; // This is almost definitely wrong
+    let samplerate = 100; // This is almost definitely wrong
     let generate_interval = Math.round(duration*samplerate); // seconds
     let count = 0;
     let max_dy = 50;
     let yvalues = new Array(channels);
     let other_yvalues = new Array(channels);
     for (let chan = 0; chan < channels; chan++){
-        yvalues[chan] = new Array(200).fill(0);
-        other_yvalues[chan] = new Array(200).fill(0);
+        yvalues[chan] = new Array(reduce_point_display_factor).fill(0);
+        other_yvalues[chan] = new Array(reduce_point_display_factor).fill(0);
     }
-    let basetime = new Array(200).fill(Date.now());
-    let other_basetime = new Array(200).fill(Date.now());
-    let signal = [];
+    let basetime = new Array(reduce_point_display_factor).fill(Date.now());
+    let other_basetime = new Array(reduce_point_display_factor).fill(Date.now());
+
+    // New Variables for WebGL
+    let signal = new Array(channels);
+    let other_signal = new Array(channels);
+    for (let chan = 0; chan < channels; chan++){
+        signal[chan] = new Array(reduce_point_display_factor).fill(0);
+        other_signal[chan] = new Array(reduce_point_display_factor).fill(0);
+    }
+
     let passed_signal = []
     let passed_time = []
 

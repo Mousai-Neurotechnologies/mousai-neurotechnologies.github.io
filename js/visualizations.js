@@ -192,27 +192,6 @@ function chooseVis(option){
                     p5.rectMode(p5.CORNERS);
                     p5.rect(band * (p5.width / (band_names.length)), p5.height / 2, (band + 1) * (p5.width / (band_names.length)), power)
                 }
-
-                // Plot Synchrony
-                if (usr == 'me') {
-                    // squareColor.setAlpha(255);
-                    // p5.fill(squareColor)
-                    if (synchrony != 1 && !isNaN(synchrony)) {
-                        if (synchrony > 0) {
-                            document.getElementById('sync-dot').style.backgroundColor = sync_color;
-                        } else {
-                            document.getElementById('sync-dot').style.backgroundColor = antisync_color;
-                        }
-
-                        document.getElementById('sync-dot').style.width = (synchrony * 50).toString() + 'px';
-                        document.getElementById('sync-dot').style.height = (synchrony * 50).toString() + 'px';
-                        // p5.ellipse(2*p5.width / 3, -p5.height / 4, synchrony * 50, synchrony * 50);
-                    } else{
-                        document.getElementById('sync-dot').style.height = '0px';
-                        document.getElementById('sync-dot').style.width = '0px';
-
-                    }
-                }
             }
 
             function processSignal(sig, t, yvals, bt, usr, col) {

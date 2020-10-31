@@ -17,10 +17,29 @@ function convertToMesh(pointCloud){
 function reducePointCount(pointCloud,desiredCount){
     let slice;
     let output = [];
+    let resolution;
+
+    // // Enforce Divisible by 16
+    // if ((resolution%16) != 0){
+    //     resolution -= 1;
+    // }
+    // console.log(resolution)
+    // let step = Math.floor((pointCloud.length/3)/resolution)
+    // console.log((pointCloud.length/3)/resolution)
+    // console.log(step)
+    //
+    // for (let ind = 0; ind < resolution; ind+=1){
+    //     slice = pointCloud.slice((ind*step*3), (ind*step*3)+3)
+    //     output.push(...slice)
+    // }
+    //
+    // console.log(output.length/3)
+
     for (let ind = 0; ind < (pointCloud.length/3); ind+=Math.floor((pointCloud.length/3)/desiredCount)){
         slice = pointCloud.slice(ind*3, (ind*3)+3)
         output.push(...slice)
     }
+
     return output
 }
 
@@ -31,7 +50,6 @@ function createPointCloud(pointFunction, pointCount) {
         pointCloud = getBrain()
     } else if (pointFunction == 'voltage') {
         [pointCloud, ] = getVoltages(pointCloud,pointCount)
-        console.log(pointCloud)
     }
     else{
             for (let i = 0; i < pointCount; i++) {
@@ -204,23 +222,33 @@ async function getBrain() {
 }
 
 
-function getVoltages(pointCloud, pointCount) {
+function getVoltages(pointCloud, pointCount, numUsers) {
     let channel_inds = [0];
-    let height = 2;
-    let shift_trigger = Math.floor(pointCount/(channels));
     let factor = (pointCount/(2*channels))
-    let z = -(height/2);
+    let z = -(inner_z/2);
     let y = -factor/2;
-    for (let i = 0; i < pointCount; i++) {
-        if (i%shift_trigger == 0){
-            channel_inds.push(i*3)
-            z += height/(channels);
-            y = -factor/2;
+    let point;
+
+    // let corrected_count = (pointCount/2);
+    // let shift_trigger = Math.floor(corrected_count/(channels));
+    let shift_trigger = Math.floor(pointCount/(channels));
+
+    for (let user = 0; user < 1; user++) {
+
+        for (let i = 0; i < pointCount; i++) {
+
+            if (i % shift_trigger == 0) {
+                channel_inds.push(i * 3)
+                z += inner_z / (channels);
+                y = -factor / 2;
+            }
+
+            point = [0, (y - factor / 2) / (factor / 2), z - inner_z / (2 * channels)];
+            pointCloud.push(...point);
+            y += 1
         }
-        const point = [0, (y - factor/2)/(factor/2),z];
-        pointCloud.push(...point);
-        y += 1
     }
-    return pointCloud
+
+    return [pointCloud, channel_inds]
 }
 
