@@ -141,24 +141,28 @@
     let state = 0;
     let prevState;
 
-    // Initialize Brain
+    // WebGL Variables
     let brainVertices;
     let brainMesh;
-    let desired_resolution = 1e5/2; // 80000
-    let reduce_point_display_factor = 300;
+    let DESIRED_POINTS = 1e5/2; // 80000
+    let REDUCE_POINT_DISPLAY_FACTOR = 200;
     let inner_z = 1.4;
     let signal_sustain;
     let resolution;
-    let channel_start_indices = [0];
+    let INITIAL_Z_OFFSET = 1.4;
+    let VOLTAGE_Z_OFFSET = 1.0;
+    let z_off = INITIAL_Z_OFFSET;
 
     let numUsers = 2;
 
     let displacement = [];
     let disp_flat = [];
-    let synchrony = 1;
+    let synchrony = [0];
+    SYNCHRONY_BUFFER_SIZE = 100;
 
     // Point Movement
-    let damping = .2;
+    let DAMPING = .2;
+    let t = 0.0;
 
     // Signal Generation Variables
     let channels = 1;
@@ -175,19 +179,16 @@
     let distortFlag = false;
     let distortIter = 1;
 
-
-
-
-    // New Variables for WebGL
+    // Signal Setup
     let signal = new Array(channels);
     let other_signal = new Array(channels);
     for (let chan = 0; chan < channels; chan++){
-        signal[chan] = new Array(reduce_point_display_factor).fill(0);
-        other_signal[chan] = new Array(reduce_point_display_factor).fill(0);
+        signal[chan] = new Array(REDUCE_POINT_DISPLAY_FACTOR).fill(0);
+        other_signal[chan] = new Array(REDUCE_POINT_DISPLAY_FACTOR).fill(0);
     }
-
     let passed_signal = []
 
+    // WebSocket Setup
     let messages = []
     let  url = 'https://brainsatplay.azurewebsites.net/'
     // let url = 'http://localhost:80'

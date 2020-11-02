@@ -19,6 +19,11 @@
 //     return data
 // }
 
+function sum(a,b){
+    return a + b
+}
+
+
 function closeTutorial() {
     setTimeout(() => {
         document.getElementById("tutorial").style.opacity = '0';
@@ -45,10 +50,10 @@ function getPearsonCorrelation(x, y) {
         shortestArrayLength = x.length;
     } else if (x.length > y.length) {
         shortestArrayLength = y.length;
-        console.error('x has more items in it, the last ' + (x.length - shortestArrayLength) + ' item(s) will be ignored');
+        // console.error('x has more items in it, the last ' + (x.length - shortestArrayLength) + ' item(s) will be ignored');
     } else {
         shortestArrayLength = x.length;
-        console.error('y has more items in it, the last ' + (y.length - shortestArrayLength) + ' item(s) will be ignored');
+        // console.error('y has more items in it, the last ' + (y.length - shortestArrayLength) + ' item(s) will be ignored');
     }
 
     var xy = [];
@@ -224,10 +229,12 @@ function updateDisplacement(displacement,signal,user){
 
         for (let chan in displacement[user]) {
 
-            if (signal[chan].length > 0) {
-                val = signal[chan].shift()
-            } else {
-                val = 0;
+            val = 0;
+
+            if (signal[chan] != undefined) {
+                if (signal[chan].length > 0) {
+                    val = signal[chan].shift()
+                }
             }
 
             for (let count = 0; count < Math.floor(signal_sustain); count++) {
@@ -246,7 +253,7 @@ function switchToVoltage(shape_array, shape, resolution){
 
     // Reset View Matrix
     let viewMatrix = mat4.create();
-    let z_off = inner_z;
+    let z_off = VOLTAGE_Z_OFFSET;
     mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
     mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
     mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
@@ -274,7 +281,7 @@ function distortToggle(){
     }
 
     if (!distort) {
-        distortIter =+ damping * (-distortion);
+        distortIter =+ DAMPING * (-distortion);
     }
 
     if ( distort ){

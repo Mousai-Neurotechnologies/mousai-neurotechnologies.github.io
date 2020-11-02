@@ -1,9 +1,5 @@
 const every_nth = (arr, offset, nth) => arr.filter((e, i) => (i+offset) % nth === nth - 1);
 
-function sum(a,b){
-    return a + b
-}
-
 function convertToMesh(pointCloud){
     let slice;
     let output = [];
@@ -18,22 +14,6 @@ function reducePointCount(pointCloud,desiredCount){
     let slice;
     let output = [];
     let resolution;
-
-    // // Enforce Divisible by 16
-    // if ((resolution%16) != 0){
-    //     resolution -= 1;
-    // }
-    // console.log(resolution)
-    // let step = Math.floor((pointCloud.length/3)/resolution)
-    // console.log((pointCloud.length/3)/resolution)
-    // console.log(step)
-    //
-    // for (let ind = 0; ind < resolution; ind+=1){
-    //     slice = pointCloud.slice((ind*step*3), (ind*step*3)+3)
-    //     output.push(...slice)
-    // }
-    //
-    // console.log(output.length/3)
 
     for (let ind = 0; ind < (pointCloud.length/3); ind+=Math.floor((pointCloud.length/3)/desiredCount)){
         slice = pointCloud.slice(ind*3, (ind*3)+3)
@@ -214,9 +194,10 @@ async function getBrain() {
     const json2 = await response2.json();
     const vertexData2 = json2.position
     const vertices = [...vertexData1, ...vertexData2]
+
     for(var i = 0, length = vertices.length; i < length; i++){
-        vertices[i] = vertices[i]/100;
-    }
+        vertices[i] = vertices[i]/75;
+        }
 
     return vertices
 }
