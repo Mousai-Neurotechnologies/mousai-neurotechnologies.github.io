@@ -262,3 +262,26 @@ function switchToVoltage(shape_array, shape, resolution){
 
 }
 
+function distortToggle(){
+    distort = !distort;
+
+    if (distort) {
+        distortFlag = true;
+        if (distortIter == -1) {
+            distortion = 0;
+        }
+        distortIter = 1;
+    }
+
+    if (!distort) {
+        distortIter =+ damping * (-distortion);
+    }
+
+    if ( distort ){
+        document.getElementById('distortToggle').innerHTML = "<i class=\"fas fa-pause-circle fa-2x\"></i>\n" +
+            "<p>Undistort Shape</p>"
+    } else {
+        document.getElementById('distortToggle').innerHTML = "<i class=\"fas fa-play-circle fa-2x\"></i>\n" +
+            "<p>Distort Shape</p>"
+    }
+}

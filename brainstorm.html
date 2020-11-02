@@ -8,10 +8,9 @@
     <link rel="stylesheet" type="text/css" href="css/style.css"/>
 <!--    <script src="https://d3js.org/d3.v6.min.js"></script>-->
     <script type="text/javascript" src="js/webgl.js" defer></script>
-    <script type="text/javascript" src="js/visualizations.js"></script>
     <script type="text/javascript" src="js/utils.js" defer></script>
     <script type="text/javascript" src="js/gl-matrix-min.js" defer></script>
-    <script type="text/javascript" src="js/point-functions.js" defer></script>
+    <script type="text/javascript" src="js/point-functions.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.min.js" integrity="sha512-/WwtKR6NnHomLo0O4w9QKc1INTPEJs7ko6u2aBTA1paPldhPl8LtXsi7a35iEZ69+9P5dcgVNESG8hrP4Y2t3w==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bcijs@1.8.0/dist/bci.min.js"></script>
@@ -62,6 +61,7 @@
 
 <div id="brainstorm">
 <div id="canvas-container">
+    <canvas id='webgl'></canvas>
 </div>
 <div id="tutorial">
     <div id="tutorial-text">
@@ -109,15 +109,37 @@
         </div>
     </div>
 </div>
-<!--    <div id="visualization-options">-->
-<!--        <button onclick="chooseVis('WebGL');">-->
-<!--            Particle Cloud (WebGL)-->
-<!--        </button>-->
-<!--    </div>-->
+    <div id="visualization-options">
+        <button onclick="state=0;">
+            Brain
+        </button>
+        <button onclick="state=1;">
+            Voltage Stream
+        </button>
+        <button onclick="state=2;">
+            Brain-to-Brain Synchrony
+        </button>
+        <button id='distortToggle' onclick="distortToggle()">
+            <i class="fas fa-play-circle fa-2x"></i>
+            <p>Distort Shape</p>
+        </button>
+    </div>
 </div>
 </div>
 
 <script>
+
+    let canvas = document.getElementById('webgl');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let gl = canvas.getContext('webgl')
+    // shape_array = ['brain', 'voltage', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
+    // render_array = [gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
+    let shape_array = ['brain', 'voltage',shapes.sphereShell]
+    let render_array = [gl.POINTS, gl.LINES,gl.POINTS]
+    let state = 0;
+    let prevState;
 
     // Initialize Brain
     let brainVertices;
@@ -135,7 +157,10 @@
     let disp_flat = [];
     let synchrony = 1;
 
-    // Initialize Variables and Controls (old variables from P5)
+    // Point Movement
+    let damping = .2;
+
+    // Signal Generation Variables
     let channels = 1;
     let new_chan = 1;
     let generate = false;
@@ -143,7 +168,15 @@
     let samplerate = 125; // This is almost definitely wrong
     let generate_interval = Math.round(duration*samplerate); // seconds
     let count = 0;
-    let max_dy = 50;
+
+    // Distortion Variables
+    let distort = false;
+    let distortion = 0;
+    let distortFlag = false;
+    let distortIter = 1;
+
+
+
 
     // New Variables for WebGL
     let signal = new Array(channels);
@@ -154,8 +187,6 @@
     }
 
     let passed_signal = []
-    let passed_time = []
-
 
     let messages = []
     let  url = 'https://brainsatplay.azurewebsites.net/'
@@ -184,7 +215,7 @@
 
         socket.on('bci', passSignal);
 
-        chooseVis('WebGL');
+        particleBrain()
     }
 </script>
 

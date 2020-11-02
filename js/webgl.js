@@ -5,15 +5,9 @@
 
 async function particleBrain() {
 
-    const canvas = document.getElementById('webgl')
-    const gl = canvas.getContext('webgl')
     let vertexHome;
     let vertexCurr;
     let temp;
-    // let shape_array = ['brain', 'voltage', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
-    // let render_array = [gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
-    let shape_array = ['brain', 'voltage',shapes.sphereShell]
-    let render_array = [gl.POINTS, gl.LINES,gl.POINTS]
 
 
     // ------------------------------------- P5 Ported Controls ------------------------------------ //
@@ -24,7 +18,7 @@ async function particleBrain() {
 
         channels = parseFloat(event.target.value);
 
-        [vertexHome, viewMatrix, z_off, ease, rotation, zoom, shape] = switchToVoltage(shape_array, shape, resolution)
+        [vertexHome, viewMatrix, z_off, ease, rotation, zoom, state] = switchToVoltage(shape_array, state, resolution)
 
         signal = new Array(channels);
         other_signal = new Array(channels);
@@ -70,9 +64,7 @@ async function particleBrain() {
         throw new Error('WebGL not supported')
     }
 
-    let shape = 0;
     let key_events = [37, 38, 39, 40];
-    let damping = .2;
     let z_off = 2;
 
 
@@ -86,18 +78,16 @@ async function particleBrain() {
         resolution = brainVertices.length / 3;
     }
 
-    if (shape_array[shape] == 'brain') {
+    if (shape_array[state] == 'brain') {
         vertexHome = [...brainVertices];
     } else {
-        vertexHome = createPointCloud(shape_array[shape], resolution);
+        vertexHome = createPointCloud(shape_array[state], resolution);
     }
 
     vertexCurr = vertexHome;
 
     displacement = resetDisplacement();
     disp_flat = [...displacement.flat(2)]
-    console.log(vertexHome.length)
-    console.log(disp_flat.length)
     signal_sustain = (Math.round(resolution/channels))/reduce_point_display_factor;
 
 
@@ -293,10 +283,7 @@ void main() {
     let diff_x = 0;
     let diff_y = 0;
     let scroll;
-    let distortion = 0;
     let diff = [];
-    let distortFlag = false;
-    let distortIter = 1;
     let ease = true;
     let rotation = true;
     let zoom = true;
@@ -336,52 +323,22 @@ void main() {
     document.onkeydown = function(ev){
         if (key_events.includes(ev.keyCode)){
             if (ev.keyCode == '38') {
-                distortFlag = true;
-                if (distortIter == -1) {
-                    distortion = 0;
-                }
-                distortIter = 1;
+                // distortFlag = true;
+                // if (distortIter == -1) {
+                //     distortion = 0;
+                // }
+                // distortIter = 1;
             } else if (ev.keyCode == '40') {
-                distortIter =+ damping*(-distortion);
+                // distortIter =+ damping*(-distortion);
             } else if (ev.keyCode == '39' || ev.keyCode == '37') {
-
-                    // reset displacement if leaving voltage visualization
-                    if (shape_array[shape] == 'voltage') {
-                        viewMatrix = mat4.create();
-                        z_off = 2;
-                        mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
-                        mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
-                        mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
-                        mat4.invert(viewMatrix, viewMatrix);
-                        displacement = resetDisplacement();
-                        disp_flat = [...displacement.flat(2)]
-                        gl.bindBuffer(gl.ARRAY_BUFFER, dispBuffer)
-                        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(disp_flat), gl.DYNAMIC_DRAW);
-                    }
-
-                    if (ev.keyCode == '39' && shape < (shape_array.length-1))
-                    {
-                        shape += 1
-                    }
-                    else if (ev.keyCode == '37' && shape > 0) {
-                        shape -= 1
-                    }
-
-                    if (shape_array[shape] == 'brain'){
-                        vertexHome = [...brainVertices];
-                        ease = true;
-                        rotation = true;
-                        zoom = true;
-
-                    } else if (shape_array[shape] == 'voltage'){
-                        [vertexHome, viewMatrix, z_off, ease, rotation, zoom, shape] = switchToVoltage(shape_array, shape, resolution)
-                    }
-                    else {
-                        vertexHome = createPointCloud(shape_array[shape], resolution);
-                        ease = true;
-                        rotation = true
-                        zoom = true;
-                    }
+                    //
+                    // if (ev.keyCode == '39' && state < (shape_array.length-1))
+                    // {
+                    //     state += 1
+                    // }
+                    // else if (ev.keyCode == '37' && state > 0) {
+                    //     state -= 1
+                    // }
             }
         }
     };
@@ -402,6 +359,40 @@ void main() {
         requestAnimationFrame(animate)
         mouseState()
 
+        if (state != prevState){
+
+            // reset displacement if leaving voltage visualization
+            if (shape_array[prevState] == 'voltage') {
+                viewMatrix = mat4.create();
+                z_off = 2;
+                mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
+                mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
+                mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+                mat4.invert(viewMatrix, viewMatrix);
+                displacement = resetDisplacement();
+                disp_flat = [...displacement.flat(2)]
+                gl.bindBuffer(gl.ARRAY_BUFFER, dispBuffer)
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(disp_flat), gl.DYNAMIC_DRAW);
+            }
+
+            // set up variables for new state
+            if (shape_array[state] == 'brain'){
+                vertexHome = [...brainVertices];
+                ease = true;
+                rotation = true;
+                zoom = true;
+
+            } else if (shape_array[state] == 'voltage'){
+                [vertexHome, viewMatrix, z_off, ease, rotation, zoom, state] = switchToVoltage(shape_array, state, resolution)
+            }
+            else {
+                vertexHome = createPointCloud(shape_array[state], resolution);
+                ease = true;
+                rotation = true
+                zoom = true;
+            }
+        }
+
         // Generate signal if specified
         if (generate) {
             if (count == generate_interval-1){
@@ -418,13 +409,13 @@ void main() {
         disp_flat = [...displacement.flat(2)]
 
         // Push voltage stream to displacement buffer
-        if (shape_array[shape] == 'voltage') {
+        if (shape_array[state] == 'voltage') {
             gl.bindBuffer(gl.ARRAY_BUFFER, dispBuffer)
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(disp_flat), gl.DYNAMIC_DRAW);
         }
 
         // Get synchrony
-        if (shape_array[shape] != 'brain' && shape_array[shape] != 'voltage') {
+        if (shape_array[state] != 'brain' && shape_array[state] != 'voltage') {
 
             // Synchrony of you and other users
             synchrony = getPearsonCorrelation(displacement[0].flat(), displacement[1].flat());
@@ -435,8 +426,6 @@ void main() {
             synchrony = 0;
         }
         gl.uniform1f(uniformLocations.synchrony, synchrony);
-
-
 
         // Ease points around
         if (ease){
@@ -487,7 +476,7 @@ void main() {
         gl.uniform1f(uniformLocations.distortion, distortion/100);
 
         // Draw
-        gl.drawArrays(render_array[shape], 0, vertexCurr.length / 3);
+        gl.drawArrays(render_array[state], 0, vertexCurr.length / 3);
 
         if (synchrony != 1 && !isNaN(synchrony)) {
             if (synchrony > 0) {
@@ -503,9 +492,7 @@ void main() {
 
         }
 
-
-
-
+        prevState = state;
     };
     animate()
 }
