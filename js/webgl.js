@@ -198,7 +198,7 @@ if (synchrony > 0.0) {
      ambient_noise = vec3(0.0,0.01+5.0*ambient_noise_multiplier,0.01+5.0*ambient_noise_multiplier) * cnoise(vec3(x + u_time, y + u_time,z + u_time));
      vColor = vec3(.5-synchrony,.5,synchrony + .5);
     gl_Position = matrix * vec4((position.x+distortion_noise.x+ambient_noise.x),(position.y+distortion_noise.y+ambient_noise.y),(position.z+distortion_noise.z+z_displacement+ambient_noise.z),1) * vec4(sync_scaling,sync_scaling,sync_scaling,1.0);
-    gl_PointSize = 2.0;
+    gl_PointSize = 1.0;
 }`);
     gl.compileShader(vertexShader);
 
@@ -323,22 +323,22 @@ void main() {
     document.onkeydown = function(ev){
         if (key_events.includes(ev.keyCode)){
             if (ev.keyCode == '38') {
-                // distortFlag = true;
-                // if (distortIter == -1) {
-                //     distortion = 0;
-                // }
-                // distortIter = 1;
+                distortFlag = true;
+                if (distortIter == -1) {
+                    distortion = 0;
+                }
+                distortIter = 1;
             } else if (ev.keyCode == '40') {
-                // distortIter =+ damping*(-distortion);
+                distortIter =+ DAMPING*(-distortion);
             } else if (ev.keyCode == '39' || ev.keyCode == '37') {
-                    //
-                    // if (ev.keyCode == '39' && state < (shape_array.length-1))
-                    // {
-                    //     state += 1
-                    // }
-                    // else if (ev.keyCode == '37' && state > 0) {
-                    //     state -= 1
-                    // }
+
+                    if (ev.keyCode == '39' && state < (shape_array.length-1))
+                    {
+                        state += 1
+                    }
+                    else if (ev.keyCode == '37' && state > 0) {
+                        state -= 1
+                    }
             }
         }
     };
@@ -365,6 +365,10 @@ void main() {
     function animate() {
         requestAnimationFrame(animate)
         mouseState()
+
+        if (shape_array[state] != 'voltage'){
+            diff_x += AUTO_ROTATION_X;
+        }
 
         if (state != prevState){
             t = 0;
@@ -408,6 +412,8 @@ void main() {
                 zoom = true;
             }
         }
+
+
 
         // Generate signal if specified
         if (generate) {
@@ -516,7 +522,7 @@ void main() {
 
         // Update Uniforms
         gl.uniformMatrix4fv(uniformLocations.matrix, false, mvpMatrix)
-        gl.uniform1f(uniformLocations.noiseCoeff,distortion/10);
+        gl.uniform1f(uniformLocations.noiseCoeff,distortion/5);
         gl.uniform1f(uniformLocations.distortion, distortion/100);
         gl.uniform1f(uniformLocations.u_time, t/200);
 
