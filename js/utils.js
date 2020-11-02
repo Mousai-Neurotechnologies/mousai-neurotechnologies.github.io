@@ -224,12 +224,16 @@ function updateDisplacement(displacement,signal,user){
 
         for (let chan in displacement[user]) {
 
-            if (signal[chan].length > 0) {
-                val = signal[chan].shift()
+            if (signal[chan] !=undefined)
+            {
+                if (signal[chan].length > 0) {
+                    val = signal[chan].shift()
+                } else {
+                    val = 0;
+                }
             } else {
                 val = 0;
             }
-
             for (let count = 0; count < Math.floor(signal_sustain); count++) {
                 displacement[user][chan].shift();
                 displacement[user][chan].push(val);

@@ -239,7 +239,7 @@ function getVoltages(pointCloud, pointCount, numUsers) {
 
         if (i % shift_trigger == 0) {
                 channel_inds.push(i * 3);
-                z += inner_z / (channels);
+                z -= inner_z / (channels);
                 y = -factor / 2;
         }
 
@@ -247,7 +247,7 @@ function getVoltages(pointCloud, pointCount, numUsers) {
             if (channels == 1){
                 z = (inner_z/2);
             } else {
-                z = -(inner_z/2) + inner_z / (channels);
+                z = (inner_z/2) - inner_z / (channels);
             }
             y = -factor / 2;
             usr_inds.push(i * 3)
