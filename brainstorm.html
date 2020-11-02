@@ -146,12 +146,12 @@
     let brainMesh;
     let DESIRED_POINTS = 1e5/2; // 80000
     let REDUCE_POINT_DISPLAY_FACTOR = 200;
-    let inner_z = 1.4;
     let signal_sustain;
     let resolution;
-    let INITIAL_Z_OFFSET = 1.4;
-    let VOLTAGE_Z_OFFSET = 1.0;
+    let INITIAL_Z_OFFSET = 1.7;
+    let VOLTAGE_Z_OFFSET = .7;
     let z_off = INITIAL_Z_OFFSET;
+    let inner_z = 2*VOLTAGE_Z_OFFSET;
 
     let numUsers = 2;
 
