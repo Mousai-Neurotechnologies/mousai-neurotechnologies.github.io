@@ -11,9 +11,9 @@ async function particleBrain() {
     let vertexCurr;
     let temp;
     // let shape_array = ['brain', 'voltage', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
-    // let render_array = [gl.POINTS, gl.LINES, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
-    let shape_array = ['brain', 'voltage',shapes.sphereShell2]
-    let render_array = [gl.POINTS, gl.LINE_STRIP,gl.POINTS]
+    // let render_array = [gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
+    let shape_array = ['brain', 'voltage',shapes.sphereShell]
+    let render_array = [gl.POINTS, gl.LINES,gl.POINTS]
 
 
     // ------------------------------------- P5 Ported Controls ------------------------------------ //
@@ -21,9 +21,10 @@ async function particleBrain() {
     const selectElement = document.getElementById('channels');
 
     selectElement.addEventListener('change', (event) => {
+
         channels = parseFloat(event.target.value);
 
-        [vertexHome, channel_start_indices] = getVoltages([],resolution,2);
+        [vertexHome, viewMatrix, z_off, ease, rotation, zoom, shape] = switchToVoltage(shape_array, shape, resolution)
 
         signal = new Array(channels);
         other_signal = new Array(channels);
@@ -34,10 +35,8 @@ async function particleBrain() {
         }
 
         displacement = resetDisplacement();
-        other_displacement = resetDisplacement();
-        disp_flat = [...displacement.flat()]
-        other_disp_flat = [...other_displacement.flat()]
-        signal_sustain = (Math.round(resolution/channels))/reduce_point_display_factor;
+        disp_flat = [...displacement.flat(2)]
+        signal_sustain = (Math.round(resolution/channels))/(numUsers*reduce_point_display_factor);
 
     });
 
@@ -96,10 +95,9 @@ async function particleBrain() {
     vertexCurr = vertexHome;
 
     displacement = resetDisplacement();
-    other_displacement = resetDisplacement();
-    disp_flat = [...displacement.flat()]
-    other_disp_flat = [...other_displacement.flat()]
-
+    disp_flat = [...displacement.flat(2)]
+    console.log(vertexHome.length)
+    console.log(disp_flat.length)
     signal_sustain = (Math.round(resolution/channels))/reduce_point_display_factor;
 
 
@@ -112,14 +110,6 @@ async function particleBrain() {
     const dispBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, dispBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(disp_flat), gl.DYNAMIC_DRAW);
-
-    // let forceData = [];
-    // for (let ind = 0; ind < vertexData.length/3; ind++){
-    //     forceData = [...forceData,[0.5,0.5,0.5]]
-    // }
-    // const forceBuffer = gl.createBuffer();
-    // gl.bindBuffer(gl.ARRAY_BUFFER, forceBuffer);
-    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(forceData), gl.STATIC_DRAW);
 
 // create vertex shader
     const vertexShader = gl.createShader(gl.VERTEX_SHADER)
@@ -244,7 +234,7 @@ void main() {
 // attach shaders to program
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program)
+    gl.linkProgram(program);
 
 // enable vertex attributes
     const positionLocation = gl.getAttribLocation(program, `position`);
@@ -309,6 +299,7 @@ void main() {
     let distortIter = 1;
     let ease = true;
     let rotation = true;
+    let zoom = true;
 
     canvas.onmousedown = function(ev){
         holdStatus = true;
@@ -330,20 +321,25 @@ void main() {
     };
 
     canvas.onwheel = function(ev){
-        scroll = ev.deltaY;
-        mat4.invert(viewMatrix, viewMatrix);
-        mat4.translate(viewMatrix, viewMatrix, [0, 0, -z_off]);
-        mat4.translate(viewMatrix, viewMatrix, [0,0,scroll/100]);
-        mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
-        mat4.invert(viewMatrix, viewMatrix);
-        z_off += scroll/100;
+
+        if (zoom) {
+            scroll = ev.deltaY;
+            mat4.invert(viewMatrix, viewMatrix);
+            mat4.translate(viewMatrix, viewMatrix, [0, 0, -z_off]);
+            mat4.translate(viewMatrix, viewMatrix, [0, 0, scroll / 100]);
+            mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+            mat4.invert(viewMatrix, viewMatrix);
+            z_off += scroll / 100;
+        }
     };
 
     document.onkeydown = function(ev){
         if (key_events.includes(ev.keyCode)){
             if (ev.keyCode == '38') {
                 distortFlag = true;
-                distortion = 0;
+                if (distortIter == -1) {
+                    distortion = 0;
+                }
                 distortIter = 1;
             } else if (ev.keyCode == '40') {
                 distortIter =+ damping*(-distortion);
@@ -351,10 +347,14 @@ void main() {
 
                     // reset displacement if leaving voltage visualization
                     if (shape_array[shape] == 'voltage') {
+                        viewMatrix = mat4.create();
+                        z_off = 2;
+                        mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
+                        mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
+                        mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+                        mat4.invert(viewMatrix, viewMatrix);
                         displacement = resetDisplacement();
-                        other_displacement = resetDisplacement();
-                        disp_flat = [...displacement.flat()];
-                        other_disp_flat = [...other_displacement.flat()]
+                        disp_flat = [...displacement.flat(2)]
                         gl.bindBuffer(gl.ARRAY_BUFFER, dispBuffer)
                         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(disp_flat), gl.DYNAMIC_DRAW);
                     }
@@ -370,24 +370,17 @@ void main() {
                     if (shape_array[shape] == 'brain'){
                         vertexHome = [...brainVertices];
                         ease = true;
-                        rotation = true
-                    } else if (shape_array[shape] == 'voltage'){
-                        // Reset View Matrix
-                        viewMatrix = mat4.create();
-                        mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
-                        mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
-                        mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
-                        mat4.invert(viewMatrix, viewMatrix);
+                        rotation = true;
+                        zoom = true;
 
-                        // Create signal dashboard
-                        vertexHome = createPointCloud(shape_array[shape], resolution);
-                        ease = true;
-                        rotation = false
+                    } else if (shape_array[shape] == 'voltage'){
+                        [vertexHome, viewMatrix, z_off, ease, rotation, zoom, shape] = switchToVoltage(shape_array, shape, resolution)
                     }
                     else {
                         vertexHome = createPointCloud(shape_array[shape], resolution);
                         ease = true;
                         rotation = true
+                        zoom = true;
                     }
             }
         }
@@ -420,10 +413,9 @@ void main() {
 
 
         // Append voltage stream to array
-        displacement = updateDisplacement(displacement,signal)
-        disp_flat = [...displacement.flat()]
-        other_displacement = updateDisplacement(other_displacement,other_signal)
-        other_disp_flat = [...other_displacement.flat()]
+        displacement = updateDisplacement(displacement,signal, 1) // Update the signal of others
+        displacement = updateDisplacement(displacement,other_signal,0)// Update your signal
+        disp_flat = [...displacement.flat(2)]
 
         // Push voltage stream to displacement buffer
         if (shape_array[shape] == 'voltage') {
@@ -433,7 +425,9 @@ void main() {
 
         // Get synchrony
         if (shape_array[shape] != 'brain' && shape_array[shape] != 'voltage') {
-            synchrony = getPearsonCorrelation(disp_flat, other_disp_flat);
+
+            // Synchrony of you and other users
+            synchrony = getPearsonCorrelation(displacement[0].flat(), displacement[1].flat());
             if (isNaN(synchrony)) {
                 synchrony = 0;
             }
@@ -490,7 +484,7 @@ void main() {
         // Update Uniforms
         gl.uniformMatrix4fv(uniformLocations.matrix, false, mvpMatrix)
         gl.uniform1f(uniformLocations.noiseCoeff,distortion/10);
-        gl.uniform1f(uniformLocations.distortion, distortion/1000);
+        gl.uniform1f(uniformLocations.distortion, distortion/100);
 
         // Draw
         gl.drawArrays(render_array[shape], 0, vertexCurr.length / 3);

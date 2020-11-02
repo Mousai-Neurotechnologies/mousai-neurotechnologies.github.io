@@ -133,8 +133,7 @@ elements.forEach(function(element) {
     }});
 
 function passSignal(data) {
-    passed_signal = data.signal
-    passed_time = data.time
+    other_signal = data.signal
 }
 
     // Plot Bands
@@ -165,15 +164,23 @@ function passSignal(data) {
 
 function resetDisplacement(){
     let displacement = [];
-
-    for(let chan=0; chan < channels; chan++){
-        displacement.push(new Array(Math.floor(resolution/channels)).fill(0.0));
+    let user;
+    let perUser = Math.floor(resolution/(numUsers*channels))
+    for(user=0; user < numUsers; user++){
+        displacement.push(new Array())
+        for(let chan=0; chan < channels; chan++){
+            displacement[user].push(new Array(perUser).fill(0.0));
+        }
     }
 
-    let remainder = resolution - channels*Math.floor(resolution/channels);
-    for (let chan=0; chan < remainder; chan++) {
-        displacement[chan].push(0.0)
-    }
+    let remainder = resolution - channels*numUsers*perUser
+        for (let chan = 0; chan < channels; chan++) {
+            for (user = 0; user < numUsers; user++)
+                if (remainder > 0) {
+                    remainder--;
+                    displacement[user][chan].push(0.0)
+                }
+        }
 
     return displacement
 }
@@ -204,34 +211,54 @@ function sendSignal(channels) {
     for (let channel =0; channel < channels; channel++) {
         signal[channel] = bci.generateSignal([(inner_z/2)/(2*channels)], [base_freq], samplerate, len);
     }
-    // signal = this.filterSignal(signal)
-    // signal = bci.generateSignal([59], [rangeSlider]+10, samplerate, len);
-
 
     let data = {
         signal: signal,
-        // time: basetime
     }
 
     socket.emit('bci', data)
 }
 
-function updateDisplacement(displacement,signal){
+function updateDisplacement(displacement,signal,user){
     let val;
 
-    for (let chan in displacement) {
+        for (let chan in displacement[user]) {
 
             if (signal[chan].length > 0) {
                 val = signal[chan].shift()
             } else {
-                val = 0
+                val = 0;
             }
 
-        for (let count = 0; count < Math.floor(signal_sustain); count++) {
-            displacement[chan].shift();
-            displacement[chan].push(val);
+            for (let count = 0; count < Math.floor(signal_sustain); count++) {
+                displacement[user][chan].shift();
+                displacement[user][chan].push(val);
+            }
         }
-    }
+
     return displacement
+}
+
+function switchToVoltage(shape_array, shape, resolution){
+    if (shape_array[shape] != 'voltage'){
+        shape = 1;
+    }
+
+    // Reset View Matrix
+    let viewMatrix = mat4.create();
+    let z_off = inner_z;
+    mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
+    mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
+    mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+    mat4.invert(viewMatrix, viewMatrix);
+
+    // Create signal dashboard
+    let vertexHome = getVoltages([],resolution,numUsers);
+    let ease = true;
+    let rotation = false;
+    let zoom = false;
+
+    return [vertexHome, viewMatrix, z_off, ease, rotation, zoom, shape]
+
 }
 

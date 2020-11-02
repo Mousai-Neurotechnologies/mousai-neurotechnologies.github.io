@@ -49,7 +49,7 @@ function createPointCloud(pointFunction, pointCount) {
     if (pointFunction == 'brain') {
         pointCloud = getBrain()
     } else if (pointFunction == 'voltage') {
-        [pointCloud, ] = getVoltages(pointCloud,pointCount)
+        pointCloud = getVoltages(pointCloud,pointCount,numUsers)
     }
     else{
             for (let i = 0; i < pointCount; i++) {
@@ -223,32 +223,44 @@ async function getBrain() {
 
 
 function getVoltages(pointCloud, pointCount, numUsers) {
+
     let channel_inds = [0];
-    let factor = (pointCount/(2*channels))
-    let z = -(inner_z/2);
+    let usr_inds = [0];
+    let factor = (pointCount/(2*numUsers*channels))
+    let user = -1;
+    let z;
     let y = -factor/2;
     let point;
 
-    // let corrected_count = (pointCount/2);
-    // let shift_trigger = Math.floor(corrected_count/(channels));
-    let shift_trigger = Math.floor(pointCount/(channels));
+    let shift_trigger = Math.floor(pointCount/(2*numUsers*channels));
+    let user_trigger = Math.floor(pointCount/(2*numUsers));
 
-    for (let user = 0; user < 1; user++) {
+    for (let i = 0; i < ((pointCount/2)-1); i++) {
 
-        for (let i = 0; i < pointCount; i++) {
-
-            if (i % shift_trigger == 0) {
-                channel_inds.push(i * 3)
+        if (i % shift_trigger == 0) {
+                channel_inds.push(i * 3);
                 z += inner_z / (channels);
                 y = -factor / 2;
-            }
-
-            point = [0, (y - factor / 2) / (factor / 2), z - inner_z / (2 * channels)];
-            pointCloud.push(...point);
-            y += 1
         }
+
+        if (i % user_trigger == 0){
+            if (channels == 1){
+                z = (inner_z/2);
+            } else {
+                z = -(inner_z/2) + inner_z / (channels);
+            }
+            y = -factor / 2;
+            usr_inds.push(i * 3)
+            user++;
+        }
+
+        point1 = [user*.01, (y) / (factor / 4), z - inner_z / (2 * channels)];
+        point2 = [user*.01, ((y+1)) / (factor / 4), z - inner_z / (2 * channels)];
+        pointCloud.push(...point1);
+        pointCloud.push(...point2);
+        y++;
     }
 
-    return [pointCloud, channel_inds]
+    return pointCloud
 }
 

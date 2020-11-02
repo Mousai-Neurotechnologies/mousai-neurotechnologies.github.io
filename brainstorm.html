@@ -123,16 +123,16 @@
     let brainVertices;
     let brainMesh;
     let desired_resolution = 1e5/2; // 80000
-    let reduce_point_display_factor = 100;
-    let inner_z = 2;
+    let reduce_point_display_factor = 300;
+    let inner_z = 1.4;
     let signal_sustain;
     let resolution;
     let channel_start_indices = [0];
 
+    let numUsers = 2;
+
     let displacement = [];
     let disp_flat = [];
-    let other_displacement = [];
-    let other_disp_flat = [];
     let synchrony = 1;
 
     // Initialize Variables and Controls (old variables from P5)
@@ -140,18 +140,10 @@
     let new_chan = 1;
     let generate = false;
     let duration = 1 // seconds
-    let samplerate = 100; // This is almost definitely wrong
+    let samplerate = 125; // This is almost definitely wrong
     let generate_interval = Math.round(duration*samplerate); // seconds
     let count = 0;
     let max_dy = 50;
-    let yvalues = new Array(channels);
-    let other_yvalues = new Array(channels);
-    for (let chan = 0; chan < channels; chan++){
-        yvalues[chan] = new Array(reduce_point_display_factor).fill(0);
-        other_yvalues[chan] = new Array(reduce_point_display_factor).fill(0);
-    }
-    let basetime = new Array(reduce_point_display_factor).fill(Date.now());
-    let other_basetime = new Array(reduce_point_display_factor).fill(Date.now());
 
     // New Variables for WebGL
     let signal = new Array(channels);
