@@ -200,6 +200,7 @@ if (synchrony > 0.0) {
     gl_Position = matrix * vec4((position.x+distortion_noise.x+ambient_noise.x),(position.y+distortion_noise.y+ambient_noise.y),(position.z+distortion_noise.z+z_displacement+ambient_noise.z),1) * vec4(sync_scaling,sync_scaling,sync_scaling,1.0);
     gl_PointSize = 1.0;
 }`);
+
     gl.compileShader(vertexShader);
 
 // create fragment shader
@@ -239,10 +240,9 @@ void main() {
     gl.enable(gl.BLEND)
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-// matrix code
+    // matrix code
     const uniformLocations = {
         matrix: gl.getUniformLocation(program, `matrix`),
-        // u_mouse: gl.getUniformLocation(program, `u_mouse`),
         u_time: gl.getUniformLocation(program, `u_time`),
         distortion: gl.getUniformLocation(program, `u_distortion`),
         noiseCoeff: gl.getUniformLocation(program, `u_noiseCoeff`),
@@ -290,8 +290,8 @@ void main() {
     canvas.onmousedown = function(ev){
         holdStatus = true;
         mouseEv = ev;
-        x = ev.clientX; // (ev.clientX / window.innerWidth) * 2 - 1;
-        y = ev.clientY; // -(ev.clientY / window.innerHeight) * 2 + 1;
+        x = ev.clientX// /window.innerWidth; // (ev.clientX / window.innerWidth) * 2 - 1;
+        y = ev.clientY// /window.innerHeight; // -(ev.clientY / window.innerHeight) * 2 + 1;
         prev_x = x;
         prev_y = y;
     };
@@ -303,8 +303,8 @@ void main() {
     canvas.onmousemove = function(ev){
         mouseEv = ev;
         moveStatus = true;
-        x = ev.clientX; // (ev.clientX / window.innerWidth) * 2 - 1;
-        y = ev.clientY; // -(ev.clientY / window.innerHeight) * 2 + 1;
+        x = ev.clientX// /window.innerWidth; // (ev.clientX / window.innerWidth) * 2 - 1;
+        y = ev.clientY// /window.innerHeight; // -(ev.clientY / window.innerHeight) * 2 + 1;
     };
 
     canvas.onwheel = function(ev){
@@ -355,8 +355,6 @@ void main() {
 
         // if (holdStatus){
         //     rotation = false;
-        //     // gl.uniform2fv(uniformLocations.u_mouse, new Float32Array([x/500, y/500]))
-        //     // console.log([x/500, y/500])
         // } else {
         //     rotation = true;
         // }
@@ -366,10 +364,14 @@ void main() {
         requestAnimationFrame(animate)
         mouseState()
 
+
+        // Allow auto-rotation
         if (shape_array[state] != 'voltage'){
             diff_x += AUTO_ROTATION_X;
         }
 
+
+        // Modify State
         if (state != prevState){
             t = 0;
 
@@ -414,7 +416,6 @@ void main() {
         }
 
 
-
         // Generate signal if specified
         if (generate) {
             if (count == generate_interval-1){
@@ -436,6 +437,21 @@ void main() {
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(disp_flat), gl.DYNAMIC_DRAW);
         }
 
+        // Update rotation speeds
+        moveStatus = false;
+        diff_x *= (1-DAMPING);
+        diff_y *= (1-DAMPING);
+
+        // Modify Distortion
+        if (distortFlag) {
+            if (Math.sign(distortIter) == -1){
+                distortIter =+ DAMPING*(-distortion)
+            }
+            if (distortion >= 0){
+                distortion += distortIter;
+            }
+        }
+
         // Get synchrony
         if (shape_array[state] != 'brain' && shape_array[state] != 'voltage') {
 
@@ -452,13 +468,32 @@ void main() {
                 synchrony.push(0)
             }
         }
+
+        // Modify View Matrix
+        mat4.invert(viewMatrix, viewMatrix);
+        mat4.translate(viewMatrix, viewMatrix, [0, 0, -z_off]);
+        mat4.rotateY(viewMatrix, viewMatrix, -diff_x*2*Math.PI/canvas.height);
+        mat4.rotateX(viewMatrix, viewMatrix, -diff_y*2*Math.PI/canvas.width);
+        mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+        mat4.invert(viewMatrix, viewMatrix);
+        // mat4.rotateZ(viewMatrix, viewMatrix, -0.01);
+
+        // Create container matrix for WebGL
+        mat4.multiply(mvMatrix, viewMatrix, modelMatrix)
+        mat4.multiply(mvpMatrix, projectionMatrix, mvMatrix)
+
+        // Update Uniforms
+        gl.uniformMatrix4fv(uniformLocations.matrix, false, mvpMatrix)
+        gl.uniform1f(uniformLocations.noiseCoeff,distortion/5);
+        gl.uniform1f(uniformLocations.distortion, distortion/100);
+        gl.uniform1f(uniformLocations.u_time, t/200);
         gl.uniform1f(uniformLocations.synchrony, synchrony.reduce(sum, 0) / synchrony.length);
 
 
         // Ease points around
         if (ease){
             // if (!holdStatus) {
-
+            //
             // for (let ind in vertexHome){
             //     diff = vertexHome[ind] - vertexCurr[ind]
             //     if (diff <= Math.abs(.01)){
@@ -477,13 +512,15 @@ void main() {
                             vertexCurr[3 * point + ind] += DAMPING * diff;
                         }
                     }}
-
-
             // } else {
+            //     forceSink = vec3.create()
+            //     forceSink = vec3.set(forceSink,x,y,0); //(y-window.innerHeight/2)
+            //     forceSink = vec3.transformMat4(forceSink,forceSink,mvpMatrix);
+            //     console.log(forceSink);
             //     for (let point =0; point < vertexHome.length/3; point++) {
             //         for (let ind = 0; ind < 3; ind++) {
-            //             forceSink = [0, x, y];
-            //             vertexVel[3 * point + ind] += (forceSink[0] - vertexCurr[3 * point + ind]) / 1000
+            //             // Specify x,y,z based on center = 0
+            //             vertexVel[3 * point + ind] += (forceSink[ind] - vertexCurr[3 * point + ind]) / 1000
             //             vertexCurr[3 * point + ind] += vertexVel[3 * point + ind];
             //         }
             //     }
@@ -491,40 +528,6 @@ void main() {
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexCurr), gl.DYNAMIC_DRAW);
         }
-
-        // Update rotation speeds
-        moveStatus = false;
-        diff_x *= (1-DAMPING);
-        diff_y *= (1-DAMPING);
-
-        // Modify Distortion
-        if (distortFlag) {
-            if (Math.sign(distortIter) == -1){
-                distortIter =+ DAMPING*(-distortion)
-            }
-            if (distortion >= 0){
-                distortion += distortIter;
-            }
-        }
-
-        // Modify view matrix
-        mat4.invert(viewMatrix, viewMatrix);
-        mat4.translate(viewMatrix, viewMatrix, [0, 0, -z_off]);
-        mat4.rotateY(viewMatrix, viewMatrix, -diff_x*2*Math.PI/canvas.height);
-        mat4.rotateX(viewMatrix, viewMatrix, -diff_y*2*Math.PI/canvas.width);
-        mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
-        mat4.invert(viewMatrix, viewMatrix);
-        // mat4.rotateZ(viewMatrix, viewMatrix, -0.01);
-
-        // Create container matrix for WebGL
-        mat4.multiply(mvMatrix, viewMatrix, modelMatrix)
-        mat4.multiply(mvpMatrix, projectionMatrix, mvMatrix)
-
-        // Update Uniforms
-        gl.uniformMatrix4fv(uniformLocations.matrix, false, mvpMatrix)
-        gl.uniform1f(uniformLocations.noiseCoeff,distortion/5);
-        gl.uniform1f(uniformLocations.distortion, distortion/100);
-        gl.uniform1f(uniformLocations.u_time, t/200);
 
         // Draw
         gl.drawArrays(render_array[state], 0, vertexCurr.length / 3);
