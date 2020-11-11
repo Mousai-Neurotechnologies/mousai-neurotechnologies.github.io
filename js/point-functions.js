@@ -30,6 +30,36 @@ function createPointCloud(pointFunction, pointCount) {
         pointCloud = getBrain()
     } else if (pointFunction == 'voltage') {
         pointCloud = getVoltages(pointCloud,pointCount,numUsers)
+    } else if (pointFunction == shapes.sphereShells) {
+        let dim_size = Math.ceil(Math.sqrt(numUsers));
+        // let delta = (1 + SPHERE_SPACING)
+        let delta = (2*SPHERE_PACKING_DIM)/(dim_size-1)
+        let row = 0;
+        let col = -1;
+        for (let i = 0; i < numUsers; i++) {
+            if (i % dim_size == 0) {
+                row = 0;
+                col++;
+            }
+            for (let j = 0; j < Math.floor(pointCount / numUsers); j++) {
+                const r = () => (Math.random() - 0.5);
+                let point = pointFunction(r(), r(), r());
+
+                // Reduce point radius
+                point[0] /= dim_size;
+                point[1] /= dim_size;
+                point[2] /= dim_size;
+
+                // Shift spheres
+                // point[1] += -(delta* ((dim_size-1)/2)) + (delta) * col;
+                // point[2] += -(delta* ((dim_size-1)/2)) + (delta) * row;
+                point[1] += -SPHERE_PACKING_DIM + (delta) * col;
+                point[2] += -SPHERE_PACKING_DIM + (delta) * row;
+
+                pointCloud.push(...point);
+            }
+            row++
+        }
     }
     else{
             for (let i = 0; i < pointCount; i++) {
@@ -83,6 +113,10 @@ const shapes = {
     },
 
     sphereShell(...position) {
+        return vec3.normalize(vec3.create(), position);
+    },
+
+    sphereShells(...position) {
         return vec3.normalize(vec3.create(), position);
     },
 

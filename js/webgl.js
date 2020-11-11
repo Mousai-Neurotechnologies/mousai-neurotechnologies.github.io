@@ -8,6 +8,8 @@ async function particleBrain() {
     let vertexHome;
     let vertexCurr;
     let vertexVel;
+    let cameraHome = INITIAL_Z_OFFSET;
+    let cameraCurr = INITIAL_Z_OFFSET;
     let temp;
 
 
@@ -19,7 +21,7 @@ async function particleBrain() {
 
         channels = parseFloat(event.target.value);
 
-        [vertexHome, viewMatrix, z_off, ease, rotation, zoom, state] = switchToVoltage(shape_array, state, resolution)
+        [vertexHome, , ease, rotation, zoom, state] = switchToVoltage(shape_array, state, resolution)
 
         signal = new Array(channels);
         other_signal = new Array(channels);
@@ -101,6 +103,7 @@ uniform float u_distortion;
 uniform float u_noiseCoeff;
 uniform float synchrony;
 uniform float u_time;
+uniform float aspect;
 
 float sync_scaling = 0.5+(0.5*synchrony);
 float ambient_noise_multiplier = (0.5-sync_scaling);
@@ -108,6 +111,9 @@ float ambient_noise_multiplier = (0.5-sync_scaling);
 
 vec3 distortion_noise;
 vec3 ambient_noise;
+
+vec4 positionProjected;
+vec2 currentScreen;
 
 
 
@@ -197,7 +203,12 @@ if (synchrony > 0.0) {
      distortion_noise = vec3(0,0,u_noiseCoeff) * cnoise(vec3(x + u_distortion, y + u_distortion,z + u_distortion));
      ambient_noise = vec3(0.0,0.01+5.0*ambient_noise_multiplier,0.01+5.0*ambient_noise_multiplier) * cnoise(vec3(x + u_time, y + u_time,z + u_time));
      vColor = vec3(.5-synchrony,.5,synchrony + .5);
-    gl_Position = matrix * vec4((position.x+distortion_noise.x+ambient_noise.x),(position.y+distortion_noise.y+ambient_noise.y),(position.z+distortion_noise.z+z_displacement+ambient_noise.z),1) * vec4(sync_scaling,sync_scaling,sync_scaling,1.0);
+     positionProjected = matrix * vec4((x+distortion_noise.x+ambient_noise.x),(y+distortion_noise.y+ambient_noise.y),(z+distortion_noise.z+z_displacement+ambient_noise.z),1) * vec4(sync_scaling,sync_scaling,sync_scaling,1.0);
+     currentScreen = positionProjected.xy / positionProjected.w;
+     // currentScreen.x *= aspect;
+
+     
+    gl_Position = positionProjected;
     gl_PointSize = 1.0;
 }`);
 
@@ -247,6 +258,8 @@ void main() {
         distortion: gl.getUniformLocation(program, `u_distortion`),
         noiseCoeff: gl.getUniformLocation(program, `u_noiseCoeff`),
         synchrony: gl.getUniformLocation(program, `synchrony`),
+        aspect: gl.getUniformLocation(program, `aspect`),
+
     };
 
     const modelMatrix = mat4.create();
@@ -254,7 +267,7 @@ void main() {
     let viewMatrix = mat4.create();
     mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
     mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
-    mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+    mat4.translate(viewMatrix, viewMatrix, [0, 0, cameraCurr]);
     mat4.invert(viewMatrix, viewMatrix);
 
     let projectionMatrix = mat4.create();
@@ -279,9 +292,12 @@ void main() {
     let prev_y;
     let diff_x = 0;
     let diff_y = 0;
+
+    // Event trackers
     let scroll;
     let diff;
     let diff_total;
+    let easeCamera;
     let ease = true;
     let rotation = true;
     let zoom = true;
@@ -312,11 +328,12 @@ void main() {
         if (zoom) {
             scroll = ev.deltaY;
             mat4.invert(viewMatrix, viewMatrix);
-            mat4.translate(viewMatrix, viewMatrix, [0, 0, -z_off]);
-            mat4.translate(viewMatrix, viewMatrix, [0, 0, scroll / 100]);
-            mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+            mat4.translate(viewMatrix, viewMatrix, [0, 0, -cameraCurr]);
+            cameraHome += scroll / 100;
+            cameraCurr += scroll / 100;
+            mat4.translate(viewMatrix, viewMatrix, [0, 0, cameraCurr]);
             mat4.invert(viewMatrix, viewMatrix);
-            z_off += scroll / 100;
+            // cameraHome = cameraCurr;
         }
     };
 
@@ -396,22 +413,24 @@ void main() {
             }
 
             if (shape_array[state] == 'voltage'){
-                [vertexHome, viewMatrix, z_off, ease, rotation, zoom, state] = switchToVoltage(shape_array, state, resolution)
+                [vertexHome, viewMatrix, ease, rotation, zoom, state] = switchToVoltage(shape_array, state, resolution)
+                cameraHome = VOLTAGE_Z_OFFSET;
+
             }
             else {
                 viewMatrix = mat4.create();
-                z_off = INITIAL_Z_OFFSET;
+                cameraHome = INITIAL_Z_OFFSET;
                 mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
                 mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
-                mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+                mat4.translate(viewMatrix, viewMatrix, [0, 0, cameraCurr]);
                 mat4.invert(viewMatrix, viewMatrix);
             }
 
             if (shape_array[state] != 'brain' && shape_array[state] != 'voltage'){
                 vertexHome = createPointCloud(shape_array[state], resolution);
                 ease = true;
-                rotation = true
-                zoom = true;
+                rotation = false;
+                zoom = false;
             }
         }
 
@@ -471,10 +490,10 @@ void main() {
 
         // Modify View Matrix
         mat4.invert(viewMatrix, viewMatrix);
-        mat4.translate(viewMatrix, viewMatrix, [0, 0, -z_off]);
+        mat4.translate(viewMatrix, viewMatrix, [0, 0, -cameraCurr]);
         mat4.rotateY(viewMatrix, viewMatrix, -diff_x*2*Math.PI/canvas.height);
         mat4.rotateX(viewMatrix, viewMatrix, -diff_y*2*Math.PI/canvas.width);
-        mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+        mat4.translate(viewMatrix, viewMatrix, [0, 0, cameraCurr]);
         mat4.invert(viewMatrix, viewMatrix);
         // mat4.rotateZ(viewMatrix, viewMatrix, -0.01);
 
@@ -488,6 +507,28 @@ void main() {
         gl.uniform1f(uniformLocations.distortion, distortion/100);
         gl.uniform1f(uniformLocations.u_time, t/200);
         gl.uniform1f(uniformLocations.synchrony, synchrony.reduce(sum, 0) / synchrony.length);
+        gl.uniform1f(uniformLocations.aspect, window.innerWidth/window.innerHeight);
+
+
+        // Ease camera
+        if (cameraHome != cameraCurr) {
+
+            // Reset camera in context
+            mat4.invert(viewMatrix, viewMatrix);
+            mat4.translate(viewMatrix, viewMatrix, [0, 0, -cameraCurr]);
+
+            // Update camera position
+            diff = cameraHome - cameraCurr
+            if (Math.abs(diff) <= .02) {
+                cameraCurr = cameraHome;
+            } else {
+                cameraCurr += DAMPING * diff;
+            }
+
+            // Move to new position
+            mat4.translate(viewMatrix, viewMatrix, [0, 0, cameraCurr]);
+            mat4.invert(viewMatrix, viewMatrix);
+        }
 
 
         // Ease points around
@@ -506,7 +547,7 @@ void main() {
             for (let point =0; point < vertexHome.length/3; point++){
                 for (let ind=0;ind < 3; ind++) {
                         diff = vertexHome[3 * point + ind] - vertexCurr[3 * point + ind]
-                        if (diff <= Math.abs(.02)) {
+                        if (Math.abs(diff) <= .02) {
                             vertexCurr[3 * point + ind] = vertexHome[3 * point + ind];
                         } else {
                             vertexCurr[3 * point + ind] += DAMPING * diff;

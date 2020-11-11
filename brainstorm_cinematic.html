@@ -110,19 +110,6 @@
     </div>
 </div>
     <div id="visualization-options">
-        <button onclick="state=0;">
-            3D Brain
-        </button>
-        <button onclick="state=1;">
-            Data Stream
-        </button>
-        <button onclick="state=3;">
-            Group Synchrony
-        </button>
-        <button id='distortToggle' onclick="distortToggle()">
-            <i class="fas fa-play-circle fa-2x"></i>
-            <p>Distort Shape</p>
-        </button>
     </div>
 </div>
 </div>
@@ -136,25 +123,25 @@
     let gl = canvas.getContext('webgl')
     // shape_array = ['brain', 'voltage', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
     // render_array = [gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
-    let shape_array = ['brain', 'voltage',shapes.sphereShells,shapes.sphereShell]
-    let render_array = [gl.POINTS, gl.LINES,gl.POINTS,gl.POINTS]
+    let shape_array = ['brain', 'voltage',shapes.sphereShell]
+    let render_array = [gl.POINTS, gl.LINES,gl.POINTS]
     let state = 0;
     let prevState;
 
     // WebGL Variables
     let brainVertices;
     let brainMesh;
-    let DESIRED_POINTS = 1e5/2; // 80000
+    let DESIRED_POINTS = 1e5; // 80000
     let REDUCE_POINT_DISPLAY_FACTOR = 200;
     let signal_sustain;
     let resolution;
-    let SPHERE_PACKING_DIM = 1.2;
     let INITIAL_Z_OFFSET = 1.7;
-    let VOLTAGE_Z_OFFSET = .5;
-    let AUTO_ROTATION_X = 0.0; //0.2;
+    let VOLTAGE_Z_OFFSET = .7;
+    let AUTO_ROTATION_X = 0; //0.2;
+    let z_off = INITIAL_Z_OFFSET;
     let inner_z = 2*VOLTAGE_Z_OFFSET;
 
-    let numUsers = 9;
+    let numUsers = 2;
 
     let displacement = [];
     let disp_flat = [];
@@ -167,6 +154,7 @@
 
     // Signal Generation Variables
     let channels = 1;
+    let new_chan = 1;
     let generate = false;
     let duration = 1 // seconds
     let samplerate = 125; // This is almost definitely wrong

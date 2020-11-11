@@ -253,10 +253,9 @@ function switchToVoltage(shape_array, shape, resolution){
 
     // Reset View Matrix
     let viewMatrix = mat4.create();
-    let z_off = VOLTAGE_Z_OFFSET;
     mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
     mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
-    mat4.translate(viewMatrix, viewMatrix, [0, 0, z_off]);
+    mat4.translate(viewMatrix, viewMatrix, [0, 0, INITIAL_Z_OFFSET]);
     mat4.invert(viewMatrix, viewMatrix);
 
     // Create signal dashboard
@@ -265,7 +264,7 @@ function switchToVoltage(shape_array, shape, resolution){
     let rotation = false;
     let zoom = false;
 
-    return [vertexHome, viewMatrix, z_off, ease, rotation, zoom, shape]
+    return [vertexHome, viewMatrix, ease, rotation, zoom, shape]
 
 }
 
