@@ -33,7 +33,7 @@ function createPointCloud(pointFunction, pointCount) {
     } else if (pointFunction == shapes.sphereShells) {
         let dim_size = Math.ceil(Math.sqrt(numUsers));
         // let delta = (1 + SPHERE_SPACING)
-        let delta = (2*SPHERE_PACKING_DIM)/(dim_size-1)
+        let delta = (2*INNER_Z)/(dim_size-1)
         let row = 0;
         let col = -1;
         for (let i = 0; i < numUsers; i++) {
@@ -53,8 +53,8 @@ function createPointCloud(pointFunction, pointCount) {
                 // Shift spheres
                 // point[1] += -(delta* ((dim_size-1)/2)) + (delta) * col;
                 // point[2] += -(delta* ((dim_size-1)/2)) + (delta) * row;
-                point[1] += -SPHERE_PACKING_DIM + (delta) * col;
-                point[2] += -SPHERE_PACKING_DIM + (delta) * row;
+                point[1] += -INNER_Z + (delta) * col;
+                point[2] += -INNER_Z + (delta) * row;
 
                 pointCloud.push(...point);
             }
@@ -254,23 +254,23 @@ function getVoltages(pointCloud, pointCount, numUsers) {
 
         if (i % shift_trigger == 0) {
                 channel_inds.push(i * 3);
-                z += inner_z / (channels);
+                z += INNER_Z / (channels);
                 y = -factor / 2;
         }
 
         if (i % user_trigger == 0){
             if (channels == 1){
-                z = (inner_z/2);
+                z = (INNER_Z/2);
             } else {
-                z = -(inner_z/2) + inner_z / (channels);
+                z = -(INNER_Z/2) + INNER_Z / (channels);
             }
             y = -factor / 2;
             usr_inds.push(i * 3)
             user++;
         }
 
-        point1 = [user*.01, (y) / (factor / 4), z - inner_z / (2 * channels)];
-        point2 = [user*.01, ((y+1)) / (factor / 4), z - inner_z / (2 * channels)];
+        point1 = [user*.01, (y) / (factor / 4), z - INNER_Z / (2 * channels)];
+        point2 = [user*.01, ((y+1)) / (factor / 4), z - INNER_Z / (2 * channels)];
         pointCloud.push(...point1);
         pointCloud.push(...point2);
         y++;

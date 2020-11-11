@@ -413,9 +413,22 @@ void main() {
             }
 
             if (shape_array[state] == 'voltage'){
-                [vertexHome, viewMatrix, ease, rotation, zoom, state] = switchToVoltage(shape_array, state, resolution)
-                cameraHome = VOLTAGE_Z_OFFSET;
+                channels = document.getElementById('channels').value;
 
+                [vertexHome, , ease, rotation, zoom, state] = switchToVoltage(shape_array, state, resolution)
+
+                signal = new Array(channels);
+                other_signal = new Array(channels);
+
+                for (let chan = 0; chan < channels; chan++) {
+                    signal[chan] = new Array(REDUCE_POINT_DISPLAY_FACTOR).fill(0);
+                    other_signal[chan] = new Array(REDUCE_POINT_DISPLAY_FACTOR).fill(0);
+                }
+
+                displacement = resetDisplacement();
+                disp_flat = [...displacement.flat(2)]
+                signal_sustain = (Math.round(resolution/channels))/(numUsers*REDUCE_POINT_DISPLAY_FACTOR);
+                cameraHome = VOLTAGE_Z_OFFSET;
             }
             else {
                 viewMatrix = mat4.create();

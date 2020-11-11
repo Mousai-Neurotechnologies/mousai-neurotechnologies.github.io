@@ -214,7 +214,7 @@ function sendSignal(channels) {
 
     signal = new Array(channels);
     for (let channel =0; channel < channels; channel++) {
-        signal[channel] = bci.generateSignal([(inner_z/2)/(2*channels)], [base_freq], samplerate, len);
+        signal[channel] = bci.generateSignal([(INNER_Z/2)/(2*channels)], [base_freq], samplerate, len);
     }
 
     let data = {
