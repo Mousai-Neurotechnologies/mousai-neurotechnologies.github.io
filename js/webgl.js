@@ -59,6 +59,7 @@ async function particleBrain() {
         resolution = brainVertices.length / 3;
     }
 
+    t = 0;
     stateManager(animState)
     $('#canvas-message').animate({'opacity': 0}, 400, function(){
         $(this).html(message_array[state][animState]).animate({'opacity': 1}, 400);
