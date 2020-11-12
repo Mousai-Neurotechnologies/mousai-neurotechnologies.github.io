@@ -768,6 +768,12 @@ button i {
     color: white;
 }
 
+.menuicon{
+    padding: 20px 25px;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
 /* Brainstorm */
 #brainstorm h1{
     width: 100%;
@@ -790,7 +796,8 @@ button i {
     position: fixed; top: 0;
     left: 0; height: 100%; z-index:2;
     display: flex; flex-wrap: wrap; justify-content:center;
-    align-items: center; opacity: .9;
+    align-items: center; opacity: 0;
+    pointer-events: none;
     transition: 0.5s;
 
 }
@@ -908,6 +915,17 @@ button i {
 
 #canvas-container {
     position: relative;
+}
+
+#canvas-message{
+    position: absolute;
+    top: 50vh;
+    left: 0;
+    height: 100px;
+    width: 100%;
+    text-align: center;
+    z-index:1;
+    pointer-events: none;
 }
 
 /*!*#canvas-container canvas, #overlay {*!*/

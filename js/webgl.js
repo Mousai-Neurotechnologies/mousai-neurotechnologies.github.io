@@ -5,11 +5,6 @@
 
 async function particleBrain() {
 
-    let vertexHome;
-    let vertexCurr;
-    let vertexVel;
-    let cameraHome = INITIAL_Z_OFFSET;
-    let cameraCurr = INITIAL_Z_OFFSET;
     let temp;
 
 
@@ -21,7 +16,7 @@ async function particleBrain() {
 
         channels = parseFloat(event.target.value);
 
-        [vertexHome, , ease, rotation, zoom, state] = switchToVoltage(shape_array, state, resolution)
+        [vertexHome, , ease, rotation, zoom] = switchToVoltage(resolution)
 
         signal = new Array(channels);
         other_signal = new Array(channels);
@@ -64,11 +59,10 @@ async function particleBrain() {
         resolution = brainVertices.length / 3;
     }
 
-    if (shape_array[state] == 'brain') {
-        vertexHome = [...brainVertices];
-    } else {
-        vertexHome = createPointCloud(shape_array[state], resolution);
-    }
+    stateManager(animState)
+    $('#canvas-message').animate({'opacity': 0}, 400, function(){
+        $(this).html(message_array[state][animState]).animate({'opacity': 1}, 400);
+    });
 
     vertexCurr = vertexHome;
     vertexVel = new Array(resolution*3).fill(0);
@@ -80,11 +74,11 @@ async function particleBrain() {
 
 // createbuffer
 // load vertexData into buffer
-    const positionBuffer = gl.createBuffer();
+    positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexCurr), gl.DYNAMIC_DRAW);
 
-    const dispBuffer = gl.createBuffer();
+    dispBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, dispBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(disp_flat), gl.DYNAMIC_DRAW);
 
@@ -264,7 +258,7 @@ void main() {
 
     const modelMatrix = mat4.create();
 
-    let viewMatrix = mat4.create();
+    viewMatrix = mat4.create();
     mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
     mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
     mat4.translate(viewMatrix, viewMatrix, [0, 0, cameraCurr]);
@@ -290,17 +284,11 @@ void main() {
     let y;
     let prev_x;
     let prev_y;
-    let diff_x = 0;
-    let diff_y = 0;
 
     // Event trackers
     let scroll;
     let diff;
     let diff_total;
-    let easeCamera;
-    let ease = true;
-    let rotation = true;
-    let zoom = true;
     let forceSink;
 
     canvas.onmousedown = function(ev){
@@ -346,7 +334,7 @@ void main() {
                 }
                 distortIter = 1;
             } else if (ev.keyCode == '40') {
-                distortIter =+ DAMPING*(-distortion);
+                distortIter =+ ease_array[state][animState]*(-distortion);
             } else if (ev.keyCode == '39' || ev.keyCode == '37') {
 
                     if (ev.keyCode == '39' && state < (shape_array.length-1))
@@ -383,68 +371,31 @@ void main() {
 
 
         // Allow auto-rotation
-        if (shape_array[state] != 'voltage'){
+        if (shape_array[state][animState] != 'voltage'){
             diff_x += AUTO_ROTATION_X;
         }
 
 
         // Modify State
         if (state != prevState){
+            animState = 0;
             t = 0;
+            stateManager(animState);
+            animStart = Date.now()
+            $('#canvas-message').animate({'opacity': 0}, 400, function(){
+                $(this).html(message_array[state][animState]).animate({'opacity': 1}, 400);
+            });
+        }
 
-            // reset displacement if leaving voltage visualization
-            if (shape_array[prevState] == 'voltage') {
-                displacement = resetDisplacement();
-                disp_flat = [...displacement.flat(2)]
-                gl.bindBuffer(gl.ARRAY_BUFFER, dispBuffer)
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(disp_flat), gl.DYNAMIC_DRAW);
-            }
-
-            if (prevState == 2) {
-                synchrony = [0];
-            }
-
-            // set up variables for new state
-            if (shape_array[state] == 'brain'){
-                vertexHome = [...brainVertices];
-                ease = true;
-                rotation = true;
-                zoom = true;
-            }
-
-            if (shape_array[state] == 'voltage'){
-                channels = document.getElementById('channels').value;
-
-                [vertexHome, , ease, rotation, zoom, state] = switchToVoltage(shape_array, state, resolution)
-
-                signal = new Array(channels);
-                other_signal = new Array(channels);
-
-                for (let chan = 0; chan < channels; chan++) {
-                    signal[chan] = new Array(REDUCE_POINT_DISPLAY_FACTOR).fill(0);
-                    other_signal[chan] = new Array(REDUCE_POINT_DISPLAY_FACTOR).fill(0);
-                }
-
-                displacement = resetDisplacement();
-                disp_flat = [...displacement.flat(2)]
-                signal_sustain = (Math.round(resolution/channels))/(numUsers*REDUCE_POINT_DISPLAY_FACTOR);
-                cameraHome = VOLTAGE_Z_OFFSET;
-            }
-            else {
-                viewMatrix = mat4.create();
-                cameraHome = INITIAL_Z_OFFSET;
-                mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
-                mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
-                mat4.translate(viewMatrix, viewMatrix, [0, 0, cameraCurr]);
-                mat4.invert(viewMatrix, viewMatrix);
-            }
-
-            if (shape_array[state] != 'brain' && shape_array[state] != 'voltage'){
-                vertexHome = createPointCloud(shape_array[state], resolution);
-                ease = true;
-                rotation = false;
-                zoom = false;
-            }
+        // Update Animation
+        if (anim_array[state][animState] && ((Date.now() - animStart)/1000 > anim_array[state][animState])){
+            t = 0;
+            animState += 1;
+            stateManager(animState);
+            animStart = Date.now()
+            $('#canvas-message').animate({'opacity': 0}, 400, function(){
+                $(this).html(message_array[state][animState]).animate({'opacity': 1}, 400);
+            });
         }
 
 
@@ -464,20 +415,20 @@ void main() {
         disp_flat = [...displacement.flat(2)]
 
         // Push voltage stream to displacement buffer
-        if (shape_array[state] == 'voltage') {
+        if (shape_array[state][animState] == 'voltage') {
             gl.bindBuffer(gl.ARRAY_BUFFER, dispBuffer)
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(disp_flat), gl.DYNAMIC_DRAW);
         }
 
         // Update rotation speeds
         moveStatus = false;
-        diff_x *= (1-DAMPING);
-        diff_y *= (1-DAMPING);
+        diff_x *= (1-ease_array[state][animState]);
+        diff_y *= (1-ease_array[state][animState]);
 
         // Modify Distortion
         if (distortFlag) {
             if (Math.sign(distortIter) == -1){
-                distortIter =+ DAMPING*(-distortion)
+                distortIter =+ ease_array[state][animState]*(-distortion)
             }
             if (distortion >= 0){
                 distortion += distortIter;
@@ -485,8 +436,7 @@ void main() {
         }
 
         // Get synchrony
-        if (shape_array[state] != 'brain' && shape_array[state] != 'voltage') {
-
+        if (shape_array[state][animState] == 'brain' && t > 150) {
             // Synchrony of you and other users
             let new_sync = getPearsonCorrelation(displacement[0].flat(), displacement[1].flat());
 
@@ -495,11 +445,13 @@ void main() {
                 if (synchrony.length == SYNCHRONY_BUFFER_SIZE) {
                     synchrony.shift()
                 }
-                    synchrony.push(new_sync)
+                synchrony.push(new_sync)
             } else {
                 synchrony.push(0)
             }
-        }
+        } else {
+            synchrony = new Array(SYNCHRONY_BUFFER_SIZE).fill(0);
+        };
 
         // Modify View Matrix
         mat4.invert(viewMatrix, viewMatrix);
@@ -532,10 +484,10 @@ void main() {
 
             // Update camera position
             diff = cameraHome - cameraCurr
-            if (Math.abs(diff) <= .02) {
+            if (Math.abs(diff) <= epsilon) {
                 cameraCurr = cameraHome;
             } else {
-                cameraCurr += DAMPING * diff;
+                cameraCurr += ease_array[state][animState] * diff;
             }
 
             // Move to new position
@@ -560,10 +512,10 @@ void main() {
             for (let point =0; point < vertexHome.length/3; point++){
                 for (let ind=0;ind < 3; ind++) {
                         diff = vertexHome[3 * point + ind] - vertexCurr[3 * point + ind]
-                        if (Math.abs(diff) <= .02) {
+                        if (Math.abs(diff) <= epsilon) {
                             vertexCurr[3 * point + ind] = vertexHome[3 * point + ind];
                         } else {
-                            vertexCurr[3 * point + ind] += DAMPING * diff;
+                            vertexCurr[3 * point + ind] += ease_array[state][animState] * diff;
                         }
                     }}
             // } else {
@@ -584,25 +536,22 @@ void main() {
         }
 
         // Draw
-        gl.drawArrays(render_array[state], 0, vertexCurr.length / 3);
+        gl.drawArrays(render_array[state][animState], 0, vertexCurr.length / 3);
 
-        if (shape_array[state] != 'brain') {
-            let sync_average = synchrony.reduce(sum, 0) / synchrony.length
-            if (sync_average > 0) {
-                document.getElementById('sync-dot').style.backgroundColor = 'rgb(118, 190, 255)';
-            } else {
-                document.getElementById('sync-dot').style.backgroundColor = 'rgb(255, 118, 233)';
-            }
-            document.getElementById('sync-dot').style.width = (Math.abs(sync_average) * 50).toString() + 'px';
-            document.getElementById('sync-dot').style.height = (Math.abs(sync_average) * 50).toString() + 'px';
-        } else{
-            document.getElementById('sync-dot').style.height = '0px';
-            document.getElementById('sync-dot').style.width = '0px';
-
+        // Update Simple Synchrony Display
+        let sync_average = synchrony.reduce(sum, 0) / synchrony.length
+        if (sync_average > 0) {
+            document.getElementById('sync-dot').style.backgroundColor = 'rgb(118, 190, 255)';
+        } else {
+            document.getElementById('sync-dot').style.backgroundColor = 'rgb(255, 118, 233)';
         }
+        document.getElementById('sync-dot').style.width = (Math.abs(sync_average) * 50).toString() + 'px';
+        document.getElementById('sync-dot').style.height = (Math.abs(sync_average) * 50).toString() + 'px';
 
+        // Update states for next animation loop
         prevState = state;
-        if (shape_array[state] != 'voltage') {
+
+        if (shape_array[state][animState] != 'voltage') {
             t++;
         }
     };

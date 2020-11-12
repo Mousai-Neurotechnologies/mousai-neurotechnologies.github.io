@@ -31,13 +31,19 @@
     <!--Navbar-->
     <div id="app-menu">
         <div id="menu-toggle" class="toggle"><div class="icon"><i class="fas fa-angle-right fa-3x"></i></div></div>
-        <div class="icon"><a href="./index.html" class="img"><img alt="Mousai Neurotechnologies" src="assets/logo_long.png"></a></div>
+        <div class="icon menuicon"><a href="./index.html" class="img"><img alt="Mousai Neurotechnologies" src="assets/logo_long.png"></a></div>
         </a>
-        <div class="icon" onclick="openTutorial()">
-        <a><i class="fas fa-book-open fa-2x"></i></a><p>Tutorial</p>
+        <div class="icon menuicon" onclick="state = 0">
+            <a><i class="fas fa-home fa-2x"></i></a><p>Main UI</p>
         </div>
-        <div class="icon" onclick="window.open('https://github.com/Mousai-Neurotechnologies/brainstorm-client','mywindow');">
-            <a><i class="fab fa-python fa-2x"></i></a><p>Python Client</p>
+        <div class="icon menuicon" onclick="state = 1">
+            <a><i class="fas fa-wave-square fa-2x"></i></a><p>Inspect Voltages</p>
+        </div>
+        <div class="icon menuicon" onclick="openTutorial()">
+            <a><i class="fas fa-book-open fa-2x"></i></a><p>Tutorial</p>
+        </div>
+        <div class="icon menuicon" onclick="window.open('https://github.com/Mousai-Neurotechnologies/brainstorm-client','mywindow');">
+            <a><i class="fab fa-python fa-2x"></i></a><p>Download Python Client</p>
         </div>
     </div>
 
@@ -109,26 +115,31 @@
         </div>
     </div>
 </div>
-    <div id="visualization-options">
-        <button onclick="state=0;">
-            3D Brain
-        </button>
-        <button onclick="state=1;">
-            Data Stream
-        </button>
-        <button onclick="state=3;">
-            Group Synchrony
-        </button>
-        <button id='distortToggle' onclick="distortToggle()">
-            <i class="fas fa-play-circle fa-2x"></i>
-            <p>Distort Shape</p>
-        </button>
+    <div class="message-container">
+        <span id="canvas-message"></span>
     </div>
+<!--    <div id="visualization-options">-->
+<!--        <button onclick="state=0;">-->
+<!--            Brainstorm UI-->
+<!--        </button>-->
+<!--        <button onclick="state=1;">-->
+<!--            Data Stream-->
+<!--        </button>-->
+<!--    </div>-->
 </div>
 </div>
 
 <script>
 
+    // WebSocket Setup
+    let messages = []
+    let url = 'https://brainsatplay.azurewebsites.net/'
+    let socket = io.connect((url))
+
+    let numUsers = 4; // Currently hardcoded; derive dynamically from server later
+
+
+    // WebGL Setup
     let canvas = document.getElementById('webgl');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -136,14 +147,30 @@
     let gl = canvas.getContext('webgl')
     // shape_array = ['brain', 'voltage', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
     // render_array = [gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
-    let shape_array = ['brain', 'voltage',shapes.sphereShells,shapes.sphereShell]
-    let render_array = [gl.POINTS, gl.LINES,gl.POINTS,gl.POINTS]
-    let state = 0;
-    let prevState;
+    let shape_array = [[shapes.sphereShells,'brains','brain'], ['voltage']]
+    let anim_array = [[5.0,3.0,false],[false]] // In seconds; false has no animation
+    let render_array = [[gl.POINTS, gl.POINTS, gl.POINTS], [gl.LINES]];
+    let message_array = [[numUsers + ' users online. scanning brains...', 'welcome to the brainstorm', ''], ['']];
+    let ease_array = [[.1, .1, .05], [.1]];
 
-    // WebGL Variables
+    let state = 0;
+    let prevState = 0;
+    let animState = 0;
+    let animStart = Date.now();
+
+    // WebGL Containers
     let brainVertices;
     let brainMesh;
+    let vertexHome;
+    let vertexCurr;
+    let vertexVel;
+
+    let viewMatrix;
+
+    let positionBuffer;
+    let dispBuffer;
+
+    // WebGL Variables
     let DESIRED_POINTS = 1e5/2; // 80000
     let REDUCE_POINT_DISPLAY_FACTOR = 200;
     let signal_sustain;
@@ -153,16 +180,26 @@
     let AUTO_ROTATION_X = 0.0; //0.2;
     let INNER_Z = 2*VOLTAGE_Z_OFFSET;
 
-    let numUsers = 4;
-
     let displacement = [];
     let disp_flat = [];
-    let synchrony = [0];
     SYNCHRONY_BUFFER_SIZE = 100;
+    let synchrony = new Array(SYNCHRONY_BUFFER_SIZE).fill(0);
+
+
+    // Camera
+    let cameraHome = INITIAL_Z_OFFSET;
+    let cameraCurr = INITIAL_Z_OFFSET;
 
     // Point Movement
-    let DAMPING = .2;
+    let DAMPING = .1;
+    let epsilon = .001;
     let t = 0.0;
+    let diff_x = 0;
+    let diff_y = 0;
+
+    let ease = true;
+    let rotation = true;
+    let zoom = true;
 
     // Signal Generation Variables
     let channels = 1;
@@ -187,12 +224,6 @@
     }
     let passed_signal = []
 
-    // WebSocket Setup
-    let messages = []
-    let  url = 'https://brainsatplay.azurewebsites.net/'
-    // let url = 'http://localhost:80'
-    let socket = io.connect((url))
-
     $(function () {
         $('form').submit(function(e) {
             e.preventDefault(); // prevents page reloading
@@ -203,6 +234,10 @@
     });
 
     function initialize() {
+
+        $('#canvas-message').animate({'opacity': 0}, 100, function(){
+            $(this).html('loading...').animate({'opacity': 1}, 0);
+        });
 
         socket.on('chat message', (data) => {
             messages = [...messages, data];
@@ -215,6 +250,8 @@
 
         socket.on('bci', passSignal);
 
+
+        generate = generateSignal(generate,channels)
         particleBrain()
     }
 </script>

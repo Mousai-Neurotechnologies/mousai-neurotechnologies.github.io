@@ -246,11 +246,7 @@ function updateDisplacement(displacement,signal,user){
     return displacement
 }
 
-function switchToVoltage(shape_array, shape, resolution){
-    if (shape_array[shape] != 'voltage'){
-        shape = 1;
-    }
-
+function switchToVoltage(resolution){
     // Reset View Matrix
     let viewMatrix = mat4.create();
     mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
@@ -264,7 +260,7 @@ function switchToVoltage(shape_array, shape, resolution){
     let rotation = false;
     let zoom = false;
 
-    return [vertexHome, viewMatrix, ease, rotation, zoom, shape]
+    return [vertexHome, viewMatrix, ease, rotation, zoom]
 
 }
 
@@ -280,7 +276,7 @@ function distortToggle(){
     }
 
     if (!distort) {
-        distortIter =+ DAMPING * (-distortion);
+        distortIter =+ ease_array[state][animState] * (-distortion);
     }
 
     if ( distort ){
@@ -289,5 +285,65 @@ function distortToggle(){
     } else {
         document.getElementById('distortToggle').innerHTML = "<i class=\"fas fa-play-circle fa-2x\"></i>\n" +
             "<p>Distort Shape</p>"
+    }
+}
+
+
+function stateManager(animState){
+    // reset displacement if leaving voltage visualization
+
+    if (shape_array[prevState][animState] == 'voltage') {
+        displacement = resetDisplacement();
+        disp_flat = [...displacement.flat(2)]
+        gl.bindBuffer(gl.ARRAY_BUFFER, dispBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(disp_flat), gl.DYNAMIC_DRAW);
+    }
+
+    // set up variables for new state
+    if (shape_array[state][animState] == 'brain'){
+        vertexHome = [...brainVertices];
+        ease = true;
+        rotation = true;
+        zoom = true;
+    }
+
+    if (shape_array[state][animState] == 'voltage'){
+
+        channels = document.getElementById('channels').value;
+
+        [vertexHome, viewMatrix, ease, rotation, zoom] = switchToVoltage(resolution)
+
+        signal = new Array(channels);
+        other_signal = new Array(channels);
+
+        for (let chan = 0; chan < channels; chan++) {
+            signal[chan] = new Array(REDUCE_POINT_DISPLAY_FACTOR).fill(0);
+            other_signal[chan] = new Array(REDUCE_POINT_DISPLAY_FACTOR).fill(0);
+        }
+
+        displacement = resetDisplacement();
+        disp_flat = [...displacement.flat(2)]
+        signal_sustain = (Math.round(resolution/channels))/(numUsers*REDUCE_POINT_DISPLAY_FACTOR);
+        cameraHome = VOLTAGE_Z_OFFSET;
+    }
+    else {
+        viewMatrix = mat4.create();
+        cameraHome = INITIAL_Z_OFFSET;
+        mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 2);
+        mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 2);
+        mat4.translate(viewMatrix, viewMatrix, [0, 0, cameraCurr]);
+        mat4.invert(viewMatrix, viewMatrix);
+    }
+
+    if (shape_array[state][animState] != 'brain' && shape_array[state][animState] != 'voltage'){
+        vertexHome = createPointCloud(shape_array[state][animState], resolution);
+        ease = true;
+        rotation = false;
+        zoom = false;
+    }
+
+    if (!rotation){
+        diff_x = 0;
+        diff_y = 0;
     }
 }

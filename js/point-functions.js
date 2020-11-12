@@ -13,11 +13,18 @@ function convertToMesh(pointCloud){
 function reducePointCount(pointCloud,desiredCount){
     let slice;
     let output = [];
-    let resolution;
+    let usedInds = [];
 
-    for (let ind = 0; ind < (pointCloud.length/3); ind+=Math.floor((pointCloud.length/3)/desiredCount)){
-        slice = pointCloud.slice(ind*3, (ind*3)+3)
+    for (let i = 0; i < pointCloud.length/3; i+=Math.ceil((pointCloud.length/3)/desiredCount)){
+        slice = pointCloud.slice(i*3, (i*3)+3)
         output.push(...slice)
+        usedInds.push(i)
+    }
+
+    let remainder = desiredCount - (output.length/3)
+
+    for (let i =0; i < remainder; i++){
+        output.push(...pointCloud.slice((usedInds[i]+1)*3, ((usedInds[i]+1)*3)+3))
     }
 
     return output
@@ -28,11 +35,36 @@ function createPointCloud(pointFunction, pointCount) {
 
     if (pointFunction == 'brain') {
         pointCloud = getBrain()
-    } else if (pointFunction == 'voltage') {
+    } else if (pointFunction == 'brains'){
+        let oneBrain = reducePointCount(brainVertices, Math.floor((brainVertices.length/3)/numUsers))
+        let dim_size = Math.ceil(Math.sqrt(numUsers));
+        let delta = (2*INNER_Z)/(dim_size-1)
+        let row = 0;
+        let col = -1;
+
+        let tempBrain;
+        for (let i = 0; i < numUsers; i++) {
+            tempBrain = [...oneBrain];
+            if (i % dim_size == 0) {
+                row = 0;
+                col++;
+            }
+            for (let point = 0; point < (oneBrain.length/3); point++){
+                tempBrain[3*point] /= dim_size;
+                tempBrain[3*point+1] /= dim_size;
+                tempBrain[3*point+2] /= dim_size;
+
+                tempBrain[3*point+1] += -INNER_Z + (delta) * col;
+                tempBrain[3*point+2] += -INNER_Z + (delta) * row;
+        }
+            pointCloud.push(...tempBrain);
+            row++
+        }
+    }
+    else if (pointFunction == 'voltage') {
         pointCloud = getVoltages(pointCloud,pointCount,numUsers)
     } else if (pointFunction == shapes.sphereShells) {
         let dim_size = Math.ceil(Math.sqrt(numUsers));
-        // let delta = (1 + SPHERE_SPACING)
         let delta = (2*INNER_Z)/(dim_size-1)
         let row = 0;
         let col = -1;
@@ -51,8 +83,6 @@ function createPointCloud(pointFunction, pointCount) {
                 point[2] /= dim_size;
 
                 // Shift spheres
-                // point[1] += -(delta* ((dim_size-1)/2)) + (delta) * col;
-                // point[2] += -(delta* ((dim_size-1)/2)) + (delta) * row;
                 point[1] += -INNER_Z + (delta) * col;
                 point[2] += -INNER_Z + (delta) * row;
 
