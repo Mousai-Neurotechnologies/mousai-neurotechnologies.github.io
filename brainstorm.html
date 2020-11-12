@@ -33,10 +33,10 @@
         <div id="menu-toggle" class="toggle"><div class="icon"><i class="fas fa-angle-right fa-3x"></i></div></div>
         <div class="icon menuicon"><a href="./index.html" class="img"><img alt="Mousai Neurotechnologies" src="assets/logo_long.png"></a></div>
         </a>
-        <div class="icon menuicon" onclick="state = 0">
+        <div class="icon menuicon" onclick="state = 1">
             <a><i class="fas fa-home fa-2x"></i></a><p>Main UI</p>
         </div>
-        <div class="icon menuicon" onclick="state = 1">
+        <div class="icon menuicon" onclick="state = 2">
             <a><i class="fas fa-wave-square fa-2x"></i></a><p>Inspect Voltages</p>
         </div>
         <div class="icon menuicon" onclick="openTutorial()">
@@ -147,11 +147,11 @@
     let gl = canvas.getContext('webgl')
     // shape_array = ['brain', 'voltage', shapes.sphereShell, shapes.sphereShell2, shapes.boxShell, shapes.circularHyperboloid]
     // render_array = [gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS, gl.POINTS]
-    let shape_array = [[shapes.sphereShells,'brains','brain'], ['voltage']]
-    let anim_array = [[5.0,3.0,false],[false]] // In seconds; false has no animation
-    let render_array = [[gl.POINTS, gl.POINTS, gl.POINTS], [gl.LINES]];
-    let message_array = [[numUsers + ' users online. scanning brains...', 'welcome to the brainstorm', ''], ['']];
-    let ease_array = [[.1, .1, .05], [.1]];
+    let shape_array = [[shapes.sphereShells,'brains'], ['brain'], ['voltage']]
+    let anim_array = [[5.0,3.0],[false],[false]] // In seconds; false has no animation
+    let render_array = [[gl.POINTS, gl.POINTS],[gl.POINTS], [gl.LINES]];
+    let message_array = [[numUsers + ' users online. scanning brains...', 'welcome to the brainstorm'], [''], ['']];
+    let ease_array = [[.1, .1],[.1], [.1]];
 
     let state = 0;
     let prevState = 0;
@@ -184,7 +184,6 @@
     let disp_flat = [];
     SYNCHRONY_BUFFER_SIZE = 100;
     let synchrony = new Array(SYNCHRONY_BUFFER_SIZE).fill(0);
-
 
     // Camera
     let cameraHome = INITIAL_Z_OFFSET;

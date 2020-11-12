@@ -341,7 +341,7 @@ void main() {
                     {
                         state += 1
                     }
-                    else if (ev.keyCode == '37' && state > 0) {
+                    else if (ev.keyCode == '37' && state > 1) {
                         state -= 1
                     }
             }
@@ -389,8 +389,19 @@ void main() {
 
         // Update Animation
         if (anim_array[state][animState] && ((Date.now() - animStart)/1000 > anim_array[state][animState])){
+
             t = 0;
-            animState += 1;
+
+            // If there is a shape within the current state to animate to
+            if ((anim_array[state].length-1) > animState){
+                animState += 1;
+            }
+            // Else animate into next state
+            else {
+                animState = 0;
+                state += 1;
+            }
+
             stateManager(animState);
             animStart = Date.now()
             $('#canvas-message').animate({'opacity': 0}, 400, function(){
@@ -436,7 +447,7 @@ void main() {
         }
 
         // Get synchrony
-        if (shape_array[state][animState] == 'brain' && t > 150) {
+        if (shape_array[state][animState] == 'brain' && t > 100) {
             // Synchrony of you and other users
             let new_sync = getPearsonCorrelation(displacement[0].flat(), displacement[1].flat());
 
