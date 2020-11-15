@@ -137,8 +137,8 @@ elements.forEach(function(element) {
         }
     }});
 
-function passSignal(data) {
-    other_signal = data.signal
+function passSignal(msg) {
+    other_signal = msg.ts_filtered
 }
 
     // Plot Bands
@@ -217,11 +217,11 @@ function sendSignal(channels) {
         signal[channel] = bci.generateSignal([(INNER_Z/2)/(2*channels)], [base_freq], samplerate, len);
     }
 
-    let data = {
-        signal: signal,
+    let msg = {
+        ts_filtered: signal,
     }
 
-    socket.emit('bci', data)
+    socket.emit('bci', msg)
 }
 
 function updateDisplacement(displacement,signal,user){

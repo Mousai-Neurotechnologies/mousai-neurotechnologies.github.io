@@ -36,7 +36,7 @@ async function particleBrain() {
     socket.on('bci', passSignal);
 
     function passSignal(data) {
-        other_signal = data.signal
+        other_signal = data.ts_filtered
     }
 
 
