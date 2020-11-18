@@ -86,6 +86,7 @@ async function particleBrain() {
 // create vertex shader
     const vertexShader = gl.createShader(gl.VERTEX_SHADER)
     gl.shaderSource(vertexShader, `
+
 precision mediump float;
 
 attribute vec3 position;
