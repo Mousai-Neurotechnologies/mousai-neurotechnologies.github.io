@@ -112,7 +112,10 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
     document.onmousemove = function(e){
-        //TODO: [B] mouse based camera controls here
+        //TODO: [B] rotate brains, something like this
+        // brains.forEach(function(e){
+        //     e.mesh.rotate.x = something
+        // })
 
     }
 
