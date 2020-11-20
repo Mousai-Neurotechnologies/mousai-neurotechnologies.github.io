@@ -1,5 +1,4 @@
-
-DOCTYPE html>
+<!DOCTYPE html>
 <html lang=en>
 <head>
     <meta charset=utf-8>
@@ -7,7 +6,6 @@ DOCTYPE html>
     <meta name=viewport content="width=device-width,initial-scale=1">
     <link rel=icon href=assets/favicon.ico>
     <link rel="stylesheet" type="text/css" href="css/style.css"/>
-<!--    <script src="https://d3js.org/d3.v6.min.js"></script>-->
     <script type="text/javascript" src="js/webgl.js" defer></script>
     <script type="text/javascript" src="js/utils.js" defer></script>
     <script type="text/javascript" src="js/gl-matrix-min.js" defer></script>
@@ -15,19 +13,16 @@ DOCTYPE html>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.min.js" integrity="sha512-/WwtKR6NnHomLo0O4w9QKc1INTPEJs7ko6u2aBTA1paPldhPl8LtXsi7a35iEZ69+9P5dcgVNESG8hrP4Y2t3w==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bcijs@1.8.0/dist/bci.min.js"></script>
-<!--    <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>-->
-<!--    <script type="text/javascript" src="js/setup.js" defer></script>-->
+<!--        <script type="text/javascript" src="js/setup.js" defer></script>-->
     <script type="text/javascript" src="js/three.min.js" defer></script>
+    <script src="http://threejs.org/examples/js/loaders/OBJLoader.js" defer></script>
     <script type="text/javascript" src="js/brainstorm.js" defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
 
-
-
-
     <title>Brainstorm</title>
 </head>
-<body>
-<!--<body style="overflow: hidden">-->
+<!--<body onload="initialize()" style="overflow: hidden">-->
+<body style="overflow: hidden">
 <noscript>
     <strong>We're sorry but Mousai Neurotechnologies doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
 </noscript>
@@ -36,7 +31,7 @@ DOCTYPE html>
 
     <!--Navbar-->
     <div id="app-menu">
-        +9.0<div id="menu-toggle" class="toggle"><div class="icon"><i class="fas fa-angle-right fa-3x"></i></div></div>
+        <div id="menu-toggle" class="toggle"><div class="icon"><i class="fas fa-angle-right fa-3x"></i></div></div>
         <div class="icon menuicon"><a href="./index.html" class="img"><img alt="Mousai Neurotechnologies" src="assets/logo_long.png"></a></div>
         </a>
         <div class="icon menuicon" onclick="state = 1">
@@ -53,7 +48,7 @@ DOCTYPE html>
         </div>
     </div>
 
-<!--     Chat Bar-->
+    <!-- Chat Bar-->
     <div id="chat">
         <div id="chat-toggle" class="toggle"><div class="icon"><i class="fas fa-paper-plane fa-2x"></i></div></div>
         <ul id="messages"></ul>
@@ -71,73 +66,91 @@ DOCTYPE html>
         </form>
     </div>
 
-<div id="brainstorm">
-<!--<div id="canvas-container">-->
-<!--    <canvas id='webgl'></canvas>-->
-<!--</div>-->
-<div id="canvas-container">
-    <canvas id='visualization'></canvas>
-</div>
-<div id="tutorial">
-    <div id="tutorial-text">
-        <i class="fas fa-brain fa-3x"></i>
-        <h1>Welcome to Brainstorm!</h1>
-        <div class="tut-div">
-            <p>Experience a social neurotechnology platform that enables you to manage your brain data and couple with other minds across social, cultural, and political boundaries.</p>
+    <div id="brainstorm">
+        <div id="canvas-container">
+            <canvas id='webgl'></canvas>
         </div>
-        <div id="'tut-buttons">
-            <button id="close-tutorial" onclick="closeTutorial()">
-                <i class="fas fa-book fa-2x"></i>
-                Close Tutorial
-            </button>
+        <div id="tutorial">
+            <div id="tutorial-text">
+                <i class="fas fa-brain fa-3x"></i>
+                <h1>Welcome to Brainstorm!</h1>
+                <div class="tut-div">
+                    <p>Experience a social neurotechnology platform that enables you to manage your brain data and couple with other minds across social, cultural, and political boundaries.</p>
+                </div>
+                <div id="'tut-buttons">
+                    <button id="close-tutorial" onclick="closeTutorial()">
+                        <i class="fas fa-book fa-2x"></i>
+                        Close Tutorial
+                    </button>
+                </div>
+            </div>
         </div>
+        <div id="parameters">
+            <div id="param-toggle" class="toggle"><div class="icon"><i class="fas fa-magic fa-2x"></i></div></div>
+            <div >
+                <div>
+                    <button onclick="sendSignal(channels)">
+                        <i class="fas fa-wave-square fa-2x"></i>
+                        <p>Send Signal</p>
+                    </button>
+                </div>
+                <div>
+                    <button id="auto-generate" onclick=" generate = generateSignal(generate,channels)">
+                        <i class="fas fa-play-circle fa-2x"></i>
+                        <p>Autoplay Signal</p>
+                    </button>
+                </div>
+                <div class="flex wrap bound center">
+                    <p class="bound">Frequency: <span data-tw-bind="frequency">10</span></p>
+                    <input data-tw-bind="frequency" value = '10' type="range" min="1" max="100" class="slider" id="freqRange">
+                    <p class="bound">Channels</p>
+                    <select name="channels" id="channels">
+                        <option value="1">One</option>
+                        <option value="8">Eight</option>
+                        <option value="16">Sixteen</option>
+                    </select>
+                </div>
+                <div id="synchrony-div">
+                    <p>Synchrony</p>
+                    <div><span id = 'sync-dot' class="dot"></span></div>
+                </div>
+            </div>
+        </div>
+        <div class="message-container">
+            <span id="canvas-message"></span>
+        </div>
+        <!--    <div id="visualization-options">-->
+        <!--        <button onclick="state=0;">-->
+        <!--            Brainstorm UI-->
+        <!--        </button>-->
+        <!--        <button onclick="state=1;">-->
+        <!--            Data Stream-->
+        <!--        </button>-->
+        <!--    </div>-->
     </div>
 </div>
-<div id="parameters">
-    <div id="param-toggle" class="toggle"><div class="icon"><i class="fas fa-magic fa-2x"></i></div></div>
-    <div >
-        <div>
-            <button onclick="sendSignal(channels)">
-                <i class="fas fa-wave-square fa-2x"></i>
-                <p>Send Signal</p>
-            </button>
-        </div>
-        <div>
-            <button id="auto-generate" onclick=" generate = generateSignal(generate,channels)">
-                <i class="fas fa-play-circle fa-2x"></i>
-                <p>Autoplay Signal</p>
-            </button>
-        </div>
-        <div class="flex wrap bound center">
-            <p class="bound">Frequency: <span data-tw-bind="frequency">10</span></p>
-            <input data-tw-bind="frequency" value = '10' type="range" min="1" max="100" class="slider" id="freqRange">
-            <p class="bound">Channels</p>
-            <select name="channels" id="channels">
-                <option value="1">One</option>
-                <option value="8">Eight</option>
-                <option value="16">Sixteen</option>
-            </select>
-        </div>
-        <div id="synchrony-div">
-            <p>Synchrony</p>
-            <div><span id = 'sync-dot' class="dot"></span></div>
-        </div>
-    </div>
-</div>
-    <div class="message-container">
-        <span id="canvas-message"></span>
-    </div>
-<!--    <div id="visualization-options">-->
-<!--        <button onclick="state=0;">-->
-<!--            Brainstorm UI-->
-<!--        </button>-->
-<!--        <button onclick="state=1;">-->
-<!--            Data Stream-->
-<!--        </button>-->
-<!--    </div>-->
-</div>
-</div>
-
-
 </body>
+<script>
+    // function initialize() {
+    //
+    //     $('#canvas-message').animate({'opacity': 0}, 100, function(){
+    //         $(this).html('loading...').animate({'opacity': 1}, 0);
+    //     });
+    //
+    //     socket.on('chat message', (data) => {
+    //         messages = [...messages, data];
+    //         // you can also do this.messages.push(data)
+    //     });
+    //
+    //     socket.on('chat message', function (msg) {
+    //         $('#messages').append($('<li>').text(msg));
+    //     });
+    //
+    //     socket.on('bci', passSignal);
+    //
+    //
+    //     generate = generateSignal(generate,channels)
+    //     particleBrain()
+    // }
+</script>
 </html>

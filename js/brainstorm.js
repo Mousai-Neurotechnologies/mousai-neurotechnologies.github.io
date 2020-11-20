@@ -4,8 +4,8 @@ const defaultSamplerate = 125;
 const defaultChannels = 8;
 // state would go here. consider storing a global variable for the 'slide' between states here
 // mysterious garrett constants
-const VOLTAGE_Z_OFFSET = .5;
-const INNER_Z = 2*VOLTAGE_Z_OFFSET;
+const DIST_BETWEEN_WAVES = .5;
+const MAX_AMPLITUDE = 2*DIST_BETWEEN_WAVES;
 
 // TODO: [C] make this align closely with back end
 function generateVoltageStream(channels, duration, samplerate) {
@@ -14,7 +14,7 @@ function generateVoltageStream(channels, duration, samplerate) {
     let base_freq = document.getElementById("freqRange").value
     signal = new Array(channels);
     for (let channel =0; channel < channels; channel++) {
-        signal[channel] = bci.generateSignal([(INNER_Z/2)/(2*channels)], [base_freq], samplerate, len);
+        signal[channel] = bci.generateSignal([(MAX_AMPLITUDE/2)/(2*channels)], [base_freq], samplerate, len);
     }
     return signal;
 }
@@ -34,21 +34,14 @@ function createSimulatedBCIData() {
 
 
 class Brain {
-    constructor(){
+    constructor(positions){
         this.simulated = true; //will be set to false if it's livestream data? idk wanted to have this record here.
         //TODO: [A] Make this a point cloud
-        // https://github.com/mrdoob/three.js/blob/master/examples/webgl_points_dynamic.html
-        // also see https://threejs.org/docs/#api/en/materials/PointsMaterial
-        // may have to use let/var instead of const
-        // CURRENTLY this is a cube.
         // consider storing two sets of geometries here, one for brain, one for voltage lines
         // interim points can be generated as a function with an input of 0.0 to 1.0 that 'mixes' the position of the two
         // point cloud seems to have a built in morph function, but must study it more
         // Alternatively, use vertex shader + fragment shader here.
-        this.geometry = new THREE.BoxBufferGeometry( 200, 200, 200 );
-        this.material = new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } );
-        this.mesh = new THREE.Mesh( this.geometry, this.material );
-
+        this.mesh = createMesh( positions, scene, 1.0, 0, 0, 600, Math.random() * 0xffffff );
     }
     update(brainData) {
         this.timestamp = brainData.timestamp;
@@ -69,25 +62,90 @@ class Brain {
 //
 let camera, scene, renderer;
 let mesh;
+let parent;
+
+let brainVertices = [];
+let DESIRED_POINTS = 1e5/2; // 80000
+let POINT_SIZE = 1;
+let NUM_BRAINS = 3;
+
 
 let brains = [];
-
+const loader = new THREE.OBJLoader().setPath( 'assets/models/' );
+let objArray = ['lh.pial','rh.pial']
 
 init();
 animate();
 
-function resizeAmtBrains(amt){
+function resizeAmtBrains(positions,amt){
   for(let i = 0; i < amt; i++){
-      brains.push(new Brain());
+      brains.push(new Brain(positions));
   }
   //TODO: [D] take this snippet of code and make it a function somewhere outside, expose the parameters to account for variable window width,
     // perhaps do something other than arranging them side by side.
   brains.forEach(function(e,i){
-      let x = THREE.Math.mapLinear(i,0,amt,-200,200);
-      e.mesh.position.x = THREE.Math.mapLinear(i,0,4,-600,600);
+      let x = THREE.Math.mapLinear(i,-1,amt,-250,250);
+      e.mesh.position.x = x;
   });
 
 };
+
+function combineBuffer( model, bufferName ) {
+
+    let count = 0;
+
+    model.traverse( function ( child ) {
+
+        if ( child.isMesh ) {
+
+            const buffer = child.geometry.attributes[ bufferName ];
+
+            count += buffer.array.length;
+
+        }
+
+    } );
+
+    const combined = new Float32Array( count );
+
+    let offset = 0;
+
+    model.traverse( function ( child ) {
+
+        if ( child.isMesh ) {
+
+            const buffer = child.geometry.attributes[ bufferName ];
+
+            combined.set( buffer.array, offset );
+            offset += buffer.array.length;
+
+        }
+
+    } );
+
+    return new THREE.BufferAttribute( combined, 3 );
+
+}
+
+function createMesh( positions, scene, scale, x, y, z, color ) {
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute( 'position', positions.clone() );
+    geometry.setAttribute( 'initialPosition', positions.clone() );
+
+    geometry.attributes.position.setUsage( THREE.DynamicDrawUsage );
+
+        mesh = new THREE.Points( geometry, new THREE.PointsMaterial( { size: POINT_SIZE, color: color } ) );
+        mesh.scale.x = mesh.scale.y = mesh.scale.z = scale;
+
+        mesh.position.x = x;
+        mesh.position.y = y;
+        mesh.position.z = z;
+
+        parent.add( mesh );
+
+    return mesh
+}
 
 
 function init() {
@@ -96,12 +154,23 @@ function init() {
     camera.position.z = 900;
 
     scene = new THREE.Scene();
+    parent = new THREE.Object3D();
+    scene.add( parent );
+
+    let positions;
+    let _temp;
 
     //clunky, will change depending on how backend will go
-    resizeAmtBrains(3);
-    brains.forEach(function(e){
-       scene.add(e.mesh);
+    loader.load( objArray[0] + '.obj', function (object) {
+        positions = combineBuffer( object, 'position' );
+        _temp = reducePointCount(positions.array, DESIRED_POINTS);
+        positions.array = new Float32Array(_temp.length)
+        positions.array.set(_temp)
+        positions.count = positions.array.length/3
+        resolution = positions.count;
+        resizeAmtBrains(positions,NUM_BRAINS);
     });
+
 
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
@@ -134,8 +203,6 @@ function animate() {
 
     // TODO: (discuss)  Brains .update() according to new data potentially here, unless we manage databinding.
     requestAnimationFrame( animate );
-
-
 
     renderer.render( scene, camera );
 
