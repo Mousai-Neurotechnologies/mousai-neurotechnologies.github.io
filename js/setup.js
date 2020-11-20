@@ -44,9 +44,9 @@
     let signal_sustain;
     let resolution;
     let INITIAL_Z_OFFSET = 1.7;
-    let VOLTAGE_Z_OFFSET = .5;
+
     let AUTO_ROTATION_X = 0.0; //0.2;
-    let INNER_Z = 2*VOLTAGE_Z_OFFSET;
+
 
     let displacement = [];
     let disp_flat = [];
