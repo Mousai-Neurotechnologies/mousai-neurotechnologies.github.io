@@ -10,15 +10,12 @@ const INNER_Z = 2*VOLTAGE_Z_OFFSET;
 // TODO: [C] make this align closely with back end
 function generateVoltageStream(channels, duration, samplerate) {
     // returns a 2D list with channels amt of voltage signal lists that have length duration x sample rate
-
     let len = duration // seconds
     let base_freq = document.getElementById("freqRange").value
-
     signal = new Array(channels);
     for (let channel =0; channel < channels; channel++) {
         signal[channel] = bci.generateSignal([(INNER_Z/2)/(2*channels)], [base_freq], samplerate, len);
     }
-
     return signal;
 }
 
@@ -45,10 +42,10 @@ class Brain {
         // may have to use let/var instead of const
         // CURRENTLY this is a cube.
         // consider storing two sets of geometries here, one for brain, one for voltage lines
+        // interim points can be generated as a function with an input of 0.0 to 1.0 that 'mixes' the position of the two
         // point cloud seems to have a built in morph function, but must study it more
         // Alternatively, use vertex shader + fragment shader here.
         this.geometry = new THREE.BoxBufferGeometry( 200, 200, 200 );
-        //TODO [A] https://threejs.org/docs/#api/en/materials/PointsMaterial.morphTargets
         this.material = new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } );
         this.mesh = new THREE.Mesh( this.geometry, this.material );
 
@@ -59,6 +56,8 @@ class Brain {
         this.synchrony = brainData.synchrony;
         this.voltages = brainData.voltages;
         // TODO: [A] manipulate points here
+        // potentially?  https://threejs.org/docs/#api/en/materials/PointsMaterial.morphTargets
+
     }
 
 
