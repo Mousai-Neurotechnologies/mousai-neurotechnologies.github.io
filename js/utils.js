@@ -217,11 +217,18 @@ function sendSignal(channels) {
         signal[channel] = bci.generateSignal([(INNER_Z/2)/(2*channels)], [base_freq], samplerate, len);
     }
 
-    let msg = {
+    let data = {
         ts_filtered: signal,
     }
-
-    socket.emit('bci', msg)
+    if (!ws) {
+        showMessage('No WebSocket connection');
+        return;
+    } else {
+        ws.send(JSON.stringify({'destination':'bci',
+                'data': data
+            })
+        );
+    }
 }
 
 function updateDisplacement(displacement,signal,user){

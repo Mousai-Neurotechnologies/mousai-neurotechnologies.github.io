@@ -45,6 +45,15 @@
         <div class="icon menuicon" onclick="window.open('https://github.com/Mousai-Neurotechnologies/brainstorm-client','mywindow');">
             <a><i class="fab fa-python fa-2x"></i></a><p>Download Python Client</p>
         </div>
+        <div class="icon menuicon" id="login">
+            <a><i class="fas fa-arrow fa-2x"></i></a><p>Login</p>
+        </div>
+        <div class="icon menuicon" id="wsButton">
+            <a><i class="fas fa-arrow fa-2x"></i></a><p>Open Websocket</p>
+        </div>
+        <div class="icon menuicon" id="logout">
+            <a><i class="fas fa-arrow fa-2x"></i></a><p>Logout</p>
+        </div>
     </div>
 
     <!-- Chat Bar-->
@@ -133,8 +142,83 @@
 
     // WebSocket Setup
     let messages = []
-    let url = 'https://brainsatplay.azurewebsites.net/'
-    let socket = io.connect((url))
+    // let url = 'https://brainsatplay.azurewebsites.net/'
+    let url = 'http://localhost'
+    let ws;
+    clientAction('/login','POST');
+    // let socket = io.connect((url))
+    // const ws = new WebSocket('wss://echo.websocket.org');
+    // const ws = new WebSocket('ws://' + url);
+
+    const login = document.querySelector('#login');
+    const logout = document.querySelector('#logout');
+    const wsButton = document.querySelector('#wsButton');
+
+    function showMessage(res) {
+        console.log(`\n${res}`);
+    }
+
+    function handleResponse(res) {
+        return res.ok
+            ? res.json().then((data) => JSON.stringify(data, null, 2))
+            : Promise.reject(new Error('Unexpected response'));
+    }
+
+    function clientAction(destination,method){
+        fetch(url + destination, { method: method,
+            mode: 'cors',
+            credentials: 'include'
+        })
+            .then(handleResponse)
+            .then(showMessage)
+            .catch(function (err) {
+                showMessage(err.message);
+            });
+    }
+
+    function establishWebsocketConnection() {
+        if (ws) {
+            ws.onerror = ws.onopen = ws.onclose = null;
+            ws.close();
+        }
+
+        let strippedURL = url.replace(/(^\w+:|^)\/\//, '');
+        ws = new WebSocket(`ws://` + strippedURL);
+        ws.onerror = function () {
+            showMessage('WebSocket error');
+        };
+
+        ws.onopen = function () {
+            showMessage('WebSocket connection established');
+        };
+
+        ws.onmessage = function (msg) {
+            let obj = JSON.parse(msg.data);
+            if (obj.destination == 'chat'){
+                $('#messages').append($('<li>').text(obj.msg));
+            }
+            else if (obj.destination == 'bci'){
+                passSignal(obj.data)
+            }
+        };
+
+        ws.onclose = function () {
+            showMessage('WebSocket connection closed');
+            ws = null;
+        };
+    }
+
+    login.onclick = function () {
+        clientAction('/login','POST');
+    };
+
+    logout.onclick = function () {
+        clientAction('/logout','POST');
+    };
+
+    wsButton.onclick = function () {
+        establishWebsocketConnection();
+    };
 
     let numUsers = 4; // Currently hardcoded; derive dynamically from server later
 
@@ -226,7 +310,14 @@
     $(function () {
         $('form').submit(function(e) {
             e.preventDefault(); // prevents page reloading
-            socket.emit('chat message', $('#message').val());
+            if (!ws) {
+                showMessage('No WebSocket connection');
+                return;
+            }
+            ws.send(JSON.stringify({'destination':'chat',
+                'msg': $('#message').val()
+            })
+                );
             $('#message').val('');
             return false;
         });
@@ -238,21 +329,15 @@
             $(this).html('loading...').animate({'opacity': 1}, 0);
         });
 
-        socket.on('chat message', (data) => {
-            messages = [...messages, data];
-            // you can also do this.messages.push(data)
-        });
-
-        socket.on('chat message', function (msg) {
-            $('#messages').append($('<li>').text(msg));
-        });
-
-        socket.on('bci', passSignal);
-
-
-        generate = generateSignal(generate,channels)
+        establishWebsocketConnection();
         particleBrain()
     }
+
+    // Passing BCI data to WebGL visualization
+    function passSignal(data) {
+        other_signal = data.ts_filtered
+    }
+
 </script>
 
 </body>

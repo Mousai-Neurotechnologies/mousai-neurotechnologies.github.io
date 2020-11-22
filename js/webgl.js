@@ -32,13 +32,6 @@ async function particleBrain() {
 
     });
 
-    // Initialize Socket Data Passing
-    socket.on('bci', passSignal);
-
-    function passSignal(data) {
-        other_signal = data.ts_filtered
-    }
-
 
     // ------------------------------------- P5 Ported Variables ------------------------------------ //
 
@@ -64,6 +57,7 @@ async function particleBrain() {
     $('#canvas-message').animate({'opacity': 0}, 400, function(){
         $(this).html(message_array[state][animState]).animate({'opacity': 1}, 400);
     });
+
 
     vertexCurr = vertexHome;
     vertexVel = new Array(resolution*3).fill(0);
