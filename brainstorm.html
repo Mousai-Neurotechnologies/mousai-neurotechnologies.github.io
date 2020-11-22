@@ -183,7 +183,7 @@
         }
 
         let strippedURL = url.replace(/(^\w+:|^)\/\//, '');
-        ws = new WebSocket(`ws://` + strippedURL);
+        ws = new WebSocket(`wss://` + strippedURL);
         ws.onerror = function () {
             showMessage('WebSocket error');
         };
