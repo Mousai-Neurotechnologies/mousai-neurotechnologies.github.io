@@ -6,21 +6,37 @@
     <meta name=viewport content="width=device-width,initial-scale=1">
     <link rel=icon href=assets/favicon.ico>
     <link rel="stylesheet" type="text/css" href="css/style.css"/>
-    <script type="text/javascript" src="js/webgl.js" defer></script>
-    <script type="text/javascript" src="js/utils.js" defer></script>
     <script type="text/javascript" src="js/gl-matrix-min.js" defer></script>
     <script type="text/javascript" src="js/point-functions.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.min.js" integrity="sha512-/WwtKR6NnHomLo0O4w9QKc1INTPEJs7ko6u2aBTA1paPldhPl8LtXsi7a35iEZ69+9P5dcgVNESG8hrP4Y2t3w==" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bcijs@1.8.0/dist/bci.min.js"></script>
-<!--        <script type="text/javascript" src="js/setup.js" defer></script>-->
-    <script type="text/javascript" src="js/three.min.js" defer></script>
+        <script type="text/javascript" src="js/setup.js" defer></script>
+<!--    <script type="text/javascript" src="js/three.min.js" defer></script>-->
+    <script id="vs" type="notjs">
+        #ifdef GL_ES
+        precision mediump float;
+        #endif
+        uniform vec3 position;
+        //    oh I can't wait to mess around with this!
+        void main() {
+            gl_Position = vec4( position, 1.0 );
+        }
+    </script>
+    <script id="fs" type="notjs">
+        #ifdef GL_ES
+        precision mediump float;
+        #endif
 
-<!--    Three.js Utilities-->
-    <script src="js/OBJLoader.js" defer></script>
-    <script src="js/OrbitControls.js" defer></script>
+        void main() {
+            gl_FragColor = vec4(1.0,1.0,1.0,1.0);
 
+        }
+    </script>
+
+<!--    <script type="text/javascript" src="js/twgl-full.min.js" defer></script>-->
+    <script type="text/javascript" src="js/brainpoints3.js" defer></script>
     <script type="text/javascript" src="js/brainstorm.js" defer></script>
+<!--    <script type="text/javascript" src="js/visualization.js" defer></script>-->
+
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
 
     <title>Brainstorm</title>
@@ -30,7 +46,6 @@
 <noscript>
     <strong>We're sorry but Mousai Neurotechnologies doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
 </noscript>
-
 <div id=app>
 
     <!--Navbar-->
@@ -69,10 +84,9 @@
             <!--        </button>-->
         </form>
     </div>
-
     <div id="brainstorm">
         <div id="canvas-container">
-<!--            <canvas id='webgl'></canvas>-->
+            <canvas id="c"></canvas>
         </div>
         <div id="tutorial">
             <div id="tutorial-text">
@@ -134,27 +148,5 @@
     </div>
 </div>
 </body>
-<script>
-    // function initialize() {
-    //
-    //     $('#canvas-message').animate({'opacity': 0}, 100, function(){
-    //         $(this).html('loading...').animate({'opacity': 1}, 0);
-    //     });
-    //
-    //     socket.on('chat message', (data) => {
-    //         messages = [...messages, data];
-    //         // you can also do this.messages.push(data)
-    //     });
-    //
-    //     socket.on('chat message', function (msg) {
-    //         $('#messages').append($('<li>').text(msg));
-    //     });
-    //
-    //     socket.on('bci', passSignal);
-    //
-    //
-    //     generate = generateSignal(generate,channels)
-    //     particleBrain()
-    // }
-</script>
+
 </html>

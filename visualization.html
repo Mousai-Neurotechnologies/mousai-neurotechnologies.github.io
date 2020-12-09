@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf8">
+    <!--
+    @license twgl.js Copyright (c) 2015, Gregg Tavares All Rights Reserved.
+    Available via the MIT license.
+    see: http://github.com/greggman/twgl.js for details
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta property="og:title" content="TWGL.js - twgl-cube" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="http://twgljs.org/examples/screenshots/twgl-cube.png" />
+    <meta property="og:description" content="TWGL.js - twgl-cube" />
+    <meta property="og:url" content="http://twgljs.org" />
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@greggman">
+    <meta name="twitter:creator" content="@greggman">
+    <meta name="twitter:domain" content="twgljs.org">
+    <meta name="twitter:title" content="TWGL.js - twgl-cube">
+    <meta name="twitter:url" content="http://twgljs.org/examples/twgl-cube.html">
+    <meta name="twitter:description" content="TWGL.js - twgl-cube">
+    <meta name="twitter:image:src" content="http://twgljs.org/examples/screenshots/twgl-cube.png">
+<!--     development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- production version, optimized for size and speed -->
+<!--    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>-->
+
+
+    <link href="/resources/images/twgljs-icon.png" rel="shortcut icon" type="image/png">
+
+    <title>brainstorm visualization</title>
+    <style>
+        * {
+            color: white;
+            background-color: transparent; /*background-color:  black;*/
+        }
+        body {
+            margin: 0;
+            font-family: monospace;
+        }
+        canvas {
+            position: absolute;
+            z-index: -1;
+            display: block;
+            width: 100vw;
+            height: 100vh;
+
+        }
+        canvas {
+            background-color:  black;
+        }
+        #b {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            z-index: 1;
+        }
+        section {
+            margin: 1em;
+        }
+        button {
+            margin: .1em;
+        }
+    </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<main id="app">
+    <nav>
+        <button id="home">Home</button>
+    </nav>
+        <h1>Welcome to the brainstorm</h1>
+        <p>in-progress WebGL visualization of up to 6 OpenBCI EEG headsets measuring brainwaves and performing analysis</p>
+        <p>until our live event where we stream the data in March, test our work below:</p>
+        <button>Send Signal</button>
+        <button>Scientific Mode</button>
+        <section v-for="(headset, index) in headsets">
+            {{ headset.name }}<button v-on:click="remove( index )">remove</button>
+        </section>
+        <button  v-on:click="add">add</button>
+</main>
+    <footer>
+        <p>VR mode incoming! <a href="github">source</a></p>
+        <p>by <a rel="author" href="github?">Garrett Flynn</a> and <a rel="author" href="http://samir.tech">Samir Ghosh</a></p>
+        <p>with support from asdjfklasdjfkl;a</p>
+    </footer>
+
+
+<div id="b"><a href="https://github.com/Mousai-Neurotechnologies/mousai-neurotechnologies.github.io">source</a> v0.4</div>
+
+</body>
+<script type="text/javascript" src="js/brainpoints3.js" defer></script>
+<script id="vs" type="notjs">
+precision mediump float;
+
+attribute vec3 brain;
+varying vec3 vColor;
+uniform mat4 matrix;
+
+
+void main() {
+    vColor = vec3(brain.xy, 1);
+    gl_PointSize = 1.0;
+
+    gl_Position = matrix * vec4(brain,1.0);
+
+}
+  </script>
+<script id="fs" type="notjs">
+precision mediump float;
+varying vec3 color;
+void main() {
+    gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+}
+  </script>
+<script type="module">
+    const defaultDuration = 1.0;
+    const defaultSamplerate = 125;
+    const defaultChannels = 125;
+    function generateVoltageStream(channels, duration, samplerate) {
+        // returns a 2D list with channels amt of voltage signal lists that have length duration x sample rate
+        let len = duration; // seconds
+        let base_freq = document.getElementById("freqRange").value;
+        signal = new Array(channels);
+        for (let channel =0; channel < channels; channel++) {
+            signal[channel] = bci.generateSignal([(MAX_AMPLITUDE/2)/(2*channels)], [base_freq], samplerate, len);
+        }
+        return signal;
+    }
+    function createSimulatedBCIData() {
+        // simulates a JSON packet from server
+        //right now it's one object, but eventually this will be several brains
+        return {
+            timestamp: Date.now(),
+            samplerate: defaultSamplerate,
+            duration: defaultDuration,
+            voltages: generateVoltageStream(defaultChannels, defaultDuration, defaultSamplerate),
+            synchrony: Math.random() * 2 - .5
+        }
+    }
+
+    class Headset {
+        constructor() {
+            this.color = '#'+Math.floor(Math.random()*16777215).toString(16);
+            this.name = Math.random().toString(36).substring(7);
+        }
+
+    }
+    var headsets = [];
+    for(let i = 0; i < 5; i++){
+        headsets[i] = new Headset();
+    }
+
+
+
+    var app = new Vue({
+        el: '#app',
+        data: {
+            message: 'hello',
+            headsets : headsets
+        },
+        methods: {
+            remove: function(index){
+                headsets.splice(index,1);
+            },
+            add: function(){
+                headsets.push(new Headset());
+            }
+        }
+    })
+
+    import * as twgl from './js/twgl-full.module.js';
+    const m4 = twgl.m4;
+    console.log(m4);
+    const gl = document.querySelector("#c").getContext("webgl");
+    const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
+
+    const brain = brainpoints.slice(0,52119);
+
+    const arrays = {
+        brain: Array.from(brain)
+    };
+
+    const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
+
+    console.log(bufferInfo);
+
+    const uniforms = {
+        matrix: m4.identity()
+    };
+    function render(time) {
+        twgl.resizeCanvasToDisplaySize(gl.canvas);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        //
+        // gl.enable(gl.DEPTH_TEST);
+        // gl.enable(gl.CULL_FACE);
+        // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        gl.useProgram(programInfo.program);
+        twgl.setBuffersAndAttributes(gl, programInfo, bufferInfo);
+        twgl.setUniforms(programInfo, uniforms);
+        // gl.drawElements(gl.POINTS, bufferInfo.numElements, gl.UNSIGNED_SHORT, 0);
+        gl.drawArrays(gl.POINTS, 0, brain.length/3);
+
+        requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+
+</script>
+</html>
